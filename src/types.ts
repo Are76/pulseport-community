@@ -26,6 +26,29 @@ export interface Asset {
   entryPls?: number;
 }
 
+export interface InvestmentSourceAttribution {
+  asset: 'ETH' | 'USDC' | 'DAI' | 'USDT' | string;
+  chain: Chain;
+  amountUsd: number;
+}
+
+export interface InvestmentHoldingRow {
+  id: string;
+  symbol: string;
+  name: string;
+  chain: Chain;
+  amount: number;
+  currentPrice: number;
+  currentValue: number;
+  costBasis: number;
+  pnlUsd: number;
+  pnlPercent: number;
+  sourceMix: InvestmentSourceAttribution[];
+  routeSummary: string;
+  thenValue: number;
+  nowValue: number;
+}
+
 export interface HexStake {
   id: string;
   stakeId: number;
@@ -98,7 +121,7 @@ export interface LpPositionEnriched extends LpPosition {
   pendingIncUsd?: number;
   walletLpBalance: number;   // LP tokens held in wallet (normalised to 1e18)
   stakedLpBalance: number;   // LP tokens staked in MasterChef (normalised to 1e18)
-  sparkline: { t: number; v: number }[];  // 7 points, approximate - totalUsd Â± small variance
+  sparkline: { t: number; v: number }[];  // 7 points, approximate - totalUsd ± small variance
 }
 
 export interface PortfolioSummary {
