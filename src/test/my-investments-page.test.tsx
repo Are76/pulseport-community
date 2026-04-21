@@ -41,13 +41,12 @@ describe('MyInvestmentsHero', () => {
         pnlPercent={-73.8}
         liquidValue={5723}
         stakedValue={1478}
-        onOpenPlanner={() => {}}
       />
     );
 
     expect(screen.getByText('Invested Fiat')).toBeInTheDocument();
     expect(screen.getByText('$27,465')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /profit planner/i })).toBeInTheDocument();
+    expect(screen.getByText('Net P&L')).toBeInTheDocument();
   });
 });
 
@@ -143,7 +142,7 @@ describe('MyInvestmentsAssetPanel', () => {
 });
 
 describe('MyInvestmentsPage', () => {
-  it('renders the hero, filters, holdings table, and planner action together', () => {
+  it('renders the hero, filters, and holdings table without the old utility strip', () => {
     render(
       <MyInvestmentsPage
         investedFiat={27465}
@@ -152,14 +151,15 @@ describe('MyInvestmentsPage', () => {
         stakedValue={1478}
         plsUsdPrice={0.000078}
         rows={[sampleRow]}
-        onOpenPlanner={() => {}}
         onOpenTransactions={() => {}}
       />
     );
 
     expect(screen.getByText('Invested Fiat')).toBeInTheDocument();
     expect(screen.getByRole('tablist', { name: /chain filters/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /profit planner/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /profit planner/i })).not.toBeInTheDocument();
+    expect(screen.queryByText('24H Swap P&L')).not.toBeInTheDocument();
+    expect(screen.getByText('Holdings Attribution')).toBeInTheDocument();
   });
 });
 

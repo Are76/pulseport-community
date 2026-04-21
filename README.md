@@ -42,6 +42,18 @@ cp .env.example .env
 
 Then set any optional keys you want to enable (for example explorer API integrations).
 
+## Moralis webhook endpoint
+
+This repo now exposes a Vercel-compatible webhook endpoint for Moralis Streams:
+
+- `/api/moralis/stream`
+
+Use it for live wallet activity from Ethereum and Base once the app is deployed.
+
+Setup notes:
+
+- [docs/moralis-stream-setup.md](C:\Users\areje\OneDrive\Dokumenter\GitHub\pulseport-community\docs\moralis-stream-setup.md)
+
 ## User-facing privacy model
 
 - Wallets are **read-only** addresses.

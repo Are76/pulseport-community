@@ -210,11 +210,15 @@ export function buildInvestmentRows(
       const originSymbol = originChain ? normalizeTxSymbol(family, originChain) : receiveSymbol;
       const originKey = originChain ? assetKey(originChain, originSymbol) : null;
 
-      if (originChain && originKey) {
+      if (originChain && originKey && (originChain === 'ethereum' || originChain === 'base')) {
         const transferred = removeFromPosition(positions, originKey, tx.amount, usdValue);
         const route = `${chainLabel(originChain)} bridge -> ${receiveSymbol}`;
         const sources = transferred.sources.size > 0 ? transferred.sources : seedSources(tx.asset, tx.chain, transferred.cost || usdValue);
         addToPosition(positions, receiveKey, tx.amount, transferred.cost || usdValue, sources, route);
+        return;
+      }
+
+      if (tx.chain !== 'ethereum' && tx.chain !== 'base') {
         return;
       }
 

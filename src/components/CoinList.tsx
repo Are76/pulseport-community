@@ -62,6 +62,20 @@ const formatAmount = (value: number) => value.toLocaleString('en-US', { maximumF
 const formatPercent = (value = 0) => `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
 const chainAccent = (chain: string) => chain === 'pulsechain' ? '#f739ff' : chain === 'ethereum' ? '#627EEA' : '#0052ff';
 
+function CoinListLogo({ logoUrl, symbol }: { logoUrl?: string; symbol: string }) {
+  const [broken, setBroken] = React.useState(false);
+
+  return (
+    <span className="coin-list-logo">
+      {logoUrl && !broken ? (
+        <img src={logoUrl} alt={symbol} onError={() => setBroken(true)} />
+      ) : (
+        symbol.slice(0, 1)
+      )}
+    </span>
+  );
+}
+
 export function CoinList({
   items,
   variant = 'detailed',
@@ -134,12 +148,10 @@ export function CoinList({
                     else onRowClick?.(item);
                   }
                 }}
-              >
-                <div className="coin-list-cell coin-list-cell--asset">
-                  <span className="coin-list-logo">
-                    {item.logoUrl ? <img src={item.logoUrl} alt={item.symbol} /> : item.symbol.slice(0, 1)}
-                  </span>
-                  <div className="coin-list-copy">
+                >
+                  <div className="coin-list-cell coin-list-cell--asset">
+                    <CoinListLogo logoUrl={item.logoUrl} symbol={item.symbol} />
+                    <div className="coin-list-copy">
                     <button type="button" className="coin-list-name" onClick={(event) => { event.stopPropagation(); onRowClick?.(item); }}>
                       {item.name}
                     </button>

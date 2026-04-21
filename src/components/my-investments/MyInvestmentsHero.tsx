@@ -5,7 +5,6 @@ interface MyInvestmentsHeroProps {
   pnlPercent: number;
   liquidValue: number;
   stakedValue: number;
-  onOpenPlanner: () => void;
 }
 
 const formatUsd = (value: number) => `$${value.toLocaleString('en-US')}`;
@@ -43,10 +42,6 @@ export function MyInvestmentsHero(props: MyInvestmentsHeroProps) {
             <strong className="mi-stat-value">{formatUsd(props.stakedValue)}</strong>
           </article>
         </div>
-
-        <button type="button" className="mi-planner-button" onClick={props.onOpenPlanner}>
-          Profit Planner
-        </button>
       </div>
     </section>
   );

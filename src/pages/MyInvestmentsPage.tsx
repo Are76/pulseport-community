@@ -12,7 +12,6 @@ interface MyInvestmentsPageProps {
   stakedValue: number;
   plsUsdPrice: number;
   rows: InvestmentHoldingRow[];
-  onOpenPlanner: () => void;
   onOpenTransactions: (row: InvestmentHoldingRow) => void;
 }
 
@@ -31,7 +30,6 @@ export function MyInvestmentsPage(props: MyInvestmentsPageProps) {
         pnlPercent={pnlPercent}
         liquidValue={props.liquidValue}
         stakedValue={props.stakedValue}
-        onOpenPlanner={props.onOpenPlanner}
       />
       <MyInvestmentsFilters />
       <MyInvestmentsTable

@@ -172,4 +172,37 @@ describe('buildInvestmentRows', () => {
       { asset: 'ETH', chain: 'ethereum', amountUsd: 2000 },
     ]);
   });
+
+  it('ignores PulseChain-only deposits as funding sources when no Ethereum/Base inflow exists', () => {
+    const currentPls: Asset = {
+      id: 'pls',
+      symbol: 'PLS',
+      name: 'PulseChain',
+      balance: 100000,
+      price: 0.00008,
+      value: 8,
+      chain: 'pulsechain',
+    };
+
+    const txs: Transaction[] = [
+      {
+        id: 'pulse-airdrop',
+        hash: '0xair',
+        timestamp: 1,
+        type: 'deposit',
+        from: '0xexternal',
+        to: '0xme',
+        asset: 'PLS',
+        amount: 100000,
+        valueUsd: 8,
+        chain: 'pulsechain',
+      },
+    ];
+
+    const rows = buildInvestmentRows([currentPls], txs, 2000);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].costBasis).toBe(0);
+    expect(rows[0].sourceMix).toEqual([]);
+  });
 });

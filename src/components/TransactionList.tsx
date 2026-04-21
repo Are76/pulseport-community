@@ -329,11 +329,20 @@ export function TransactionList({
                   </div>
 
                   <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
-                    <span>{isSwap ? 'from' : isDeposit ? 'from' : 'to'}</span>
-                    <strong style={{ color: isOwn(isSwap || isDeposit ? tx.from : tx.to) ? 'var(--accent)' : 'var(--fg-muted)' }}>
-                      {isSwap || isDeposit ? fromLabel : toLabel}
-                    </strong>
-                    {isSwap && (
+                    {isSwap || isSwapLegOnly ? (
+                      <>
+                        <strong style={{ color: 'var(--fg)' }}>Swap</strong>
+                        <span>from</span>
+                        <strong style={{ color: isOwn(tx.from) ? 'var(--accent)' : 'var(--fg-muted)' }}>{fromLabel}</strong>
+                        <span>to</span>
+                        <strong style={{ color: isOwn(tx.to) ? 'var(--accent)' : 'var(--fg-muted)' }}>{toLabel}</strong>
+                      </>
+                    ) : isDeposit ? (
+                      <>
+                        <span>from</span>
+                        <strong style={{ color: isOwn(tx.from) ? 'var(--accent)' : 'var(--fg-muted)' }}>{fromLabel}</strong>
+                      </>
+                    ) : (
                       <>
                         <span>to</span>
                         <strong style={{ color: isOwn(tx.to) ? 'var(--accent)' : 'var(--fg-muted)' }}>{toLabel}</strong>
@@ -464,115 +473,110 @@ function SwapDetail({ tx, coinAsset, counterAsset, coinLogo, getLogoUrl, display
   const dollarPnl = resolvedUsdValue != null && nowPriceReceived > 0
     ? (tx.amount * nowPriceReceived) - resolvedUsdValue
     : null;
+  const tradePnl = dollarPnl != null && nowPriceReceived > 0
+    ? dollarPnl / nowPriceReceived
+    : null;
+  const gasSymbol = tx.chain === 'ethereum' ? 'ETH' : tx.chain === 'base' ? 'ETH' : 'PLS';
+  const gasUsd = tx.fee != null
+    ? `${tx.fee.toLocaleString('en-US', { maximumFractionDigits: 4 })} ${gasSymbol}`
+    : null;
 
   return (
-    <div className="tx-swap-detail" style={{ paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-      {/* Context line */}
-      <div className="tx-detail-context" style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 10, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <span>
-          Swap from{' '}
-          <strong style={{ color: isOwn(tx.from) ? 'var(--accent)' : 'var(--fg)' }}>{displayAddr(tx.from)}</strong>
-          {' '}to{' '}
-          <strong style={{ color: isOwn(tx.to) ? 'var(--accent)' : 'var(--fg)' }}>{displayAddr(tx.to)}</strong>
-        </span>
-        {tx.fee != null && tx.fee > 0 && (
-          <span style={{ color: 'var(--fg-subtle)', fontSize: 11 }}>
-            &#x26FD; {tx.fee.toLocaleString('en-US', { maximumFractionDigits: 4 })} {tx.chain === 'ethereum' ? 'ETH' : 'PLS'}
-          </span>
+    <div className="tx-swap-detail">
+      <div className="tx-swap-shell">
+        <div className="tx-swap-shell__top">
+          <div className="tx-swap-shell__route">
+            <strong>Swap</strong>
+            <span>from</span>
+            <strong style={{ color: isOwn(tx.from) ? 'var(--accent)' : 'var(--fg)' }}>{displayAddr(tx.from)}</strong>
+            <span>to</span>
+            <strong style={{ color: isOwn(tx.to) ? 'var(--accent)' : 'var(--fg)' }}>{displayAddr(tx.to)}</strong>
+          </div>
+          <div className="tx-swap-shell__meta">
+            {gasUsd && <span>{gasUsd}</span>}
+            <span>{formatDistanceToNowStrict(tx.timestamp, { addSuffix: true })}</span>
+          </div>
+        </div>
+
+        {(tradePnl !== null || dollarPnl !== null) && (
+          <div className="tx-swap-pnl-strip">
+            <div className={`tx-swap-pnl-chip${tradePnl != null && tradePnl >= 0 ? ' is-up' : ' is-down'}`}>
+              <span>Trade P/L</span>
+              <strong>
+                {tradePnl != null
+                  ? `${tradePnl >= 0 ? '+' : '-'}${Math.abs(tradePnl).toLocaleString('en-US', { maximumFractionDigits: 6 })}`
+                  : '-'}
+              </strong>
+            </div>
+            <div className={`tx-swap-pnl-chip${dollarPnl != null && dollarPnl >= 0 ? ' is-up' : ' is-down'}`}>
+              <span>Dollar P/L</span>
+              <strong>{dollarPnl != null ? fmtPnl(dollarPnl) : '-'}</strong>
+            </div>
+          </div>
         )}
-        <span style={{ marginLeft: 'auto', color: 'var(--fg-subtle)', fontSize: 11 }}>
-          {format(tx.timestamp, 'MMM d, yyyy HH:mm')}
-        </span>
+
+        {isPartialSwap ? (
+          <>
+            <div className="tx-token-leg-kicker">
+              Paid
+            </div>
+            <TokenLeg
+              logo={coinLogo}
+              symbol={tx.asset}
+              amount={tx.amount}
+              sign="-"
+              color="#ef4444"
+              thenPrice={thenPriceReceived}
+              nowPrice={nowPriceReceived}
+              explorerUrl={`${explorerBase}/tx/${tx.hash}`}
+              onFilter={onFilterByAsset ? () => onFilterByAsset(tx.asset) : undefined}
+            />
+            <div className="tx-swap-note">
+              Counterparty token was not returned by the explorer for this hash.
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="tx-token-leg-kicker">
+              Got
+            </div>
+            <TokenLeg
+              logo={coinLogo}
+              symbol={tx.asset}
+              amount={tx.amount}
+              sign="+"
+              color="var(--accent)"
+              thenPrice={thenPriceReceived}
+              nowPrice={nowPriceReceived}
+              explorerUrl={`${explorerBase}/tx/${tx.hash}`}
+              onFilter={onFilterByAsset ? () => onFilterByAsset(tx.asset) : undefined}
+            />
+          </>
+        )}
+
+        {!isPartialSwap && tx.counterAsset != null && tx.counterAmount != null && (
+          <div className="tx-swap-leg-section">
+            <div className="tx-token-leg-kicker">
+              Paid
+            </div>
+            <TokenLeg
+              logo={counterLogo}
+              symbol={tx.counterAsset}
+              amount={tx.counterAmount}
+              sign="-"
+              color="#ef4444"
+              thenPrice={thenPriceSpent}
+              nowPrice={nowPriceSpent}
+              explorerUrl={`${explorerBase}/tx/${tx.hash}`}
+              onFilter={onFilterByAsset && tx.counterAsset ? () => onFilterByAsset(tx.counterAsset as string) : undefined}
+            />
+          </div>
+        )}
+
+        {tx.libertySwap && (
+          <LibertySwapPanel dstChainId={tx.libertySwap.dstChainId} orderId={tx.libertySwap.orderId} />
+        )}
       </div>
-
-      {/* P&L card */}
-      {dollarPnl !== null && (
-        <div className="tx-pnl-grid" style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-          <div
-            className="tx-pnl-card"
-            style={{
-              background: dollarPnl >= 0 ? 'rgba(0,255,159,0.06)' : 'rgba(244,63,94,0.06)',
-              border: `1px solid ${dollarPnl >= 0 ? 'rgba(0,255,159,0.18)' : 'rgba(244,63,94,0.18)'}`,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              {dollarPnl >= 0
-                ? <TrendingUp size={11} style={{ color: 'var(--accent)' }} />
-                : <TrendingDown size={11} style={{ color: '#ef4444' }} />}
-              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.5px' }}>
-                Position P/L
-              </span>
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: dollarPnl >= 0 ? 'var(--accent)' : '#ef4444', fontFamily: 'var(--font-shell-display)' }}>
-              {fmtPnl(dollarPnl)}
-            </div>
-            <div style={{ fontSize: 10, color: 'var(--fg-subtle)' }}>At current prices</div>
-          </div>
-        </div>
-      )}
-
-      {isPartialSwap ? (
-        <>
-          <div className="tx-token-leg-kicker" style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.55px', marginBottom: 5 }}>
-            Paid
-          </div>
-          <TokenLeg
-            logo={coinLogo}
-            symbol={tx.asset}
-            amount={tx.amount}
-            sign="-"
-            color="#ef4444"
-            thenPrice={thenPriceReceived}
-            nowPrice={nowPriceReceived}
-            explorerUrl={`${explorerBase}/tx/${tx.hash}`}
-            onFilter={onFilterByAsset ? () => onFilterByAsset(tx.asset) : undefined}
-          />
-          <div style={{ marginTop: 8, fontSize: 11, color: 'var(--fg-subtle)' }}>
-            Counterparty token was not returned by the explorer for this hash.
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="tx-token-leg-kicker" style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.55px', marginBottom: 5 }}>
-            Got
-          </div>
-          <TokenLeg
-            logo={coinLogo}
-            symbol={tx.asset}
-            amount={tx.amount}
-            sign="+"
-            color="var(--accent)"
-            thenPrice={thenPriceReceived}
-            nowPrice={nowPriceReceived}
-            explorerUrl={`${explorerBase}/tx/${tx.hash}`}
-            onFilter={onFilterByAsset ? () => onFilterByAsset(tx.asset) : undefined}
-          />
-        </>
-      )}
-
-      {/* Spent leg */}
-      {!isPartialSwap && tx.counterAsset != null && tx.counterAmount != null && (
-        <div style={{ marginTop: 6 }}>
-          <div className="tx-token-leg-kicker" style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.55px', marginBottom: 5 }}>
-            Paid
-          </div>
-          <TokenLeg
-            logo={counterLogo}
-            symbol={tx.counterAsset}
-            amount={tx.counterAmount}
-            sign="-"
-            color="#ef4444"
-            thenPrice={thenPriceSpent}
-            nowPrice={nowPriceSpent}
-            explorerUrl={`${explorerBase}/tx/${tx.hash}`}
-            onFilter={onFilterByAsset && tx.counterAsset ? () => onFilterByAsset(tx.counterAsset as string) : undefined}
-          />
-        </div>
-      )}
-
-      {tx.libertySwap && (
-        <LibertySwapPanel dstChainId={tx.libertySwap.dstChainId} orderId={tx.libertySwap.orderId} />
-      )}
     </div>
   );
 }
@@ -592,18 +596,18 @@ interface TokenLegProps {
 
 function TokenLeg({ logo, symbol, amount, sign, color, thenPrice, nowPrice, explorerUrl, onFilter }: TokenLegProps) {
   return (
-    <div className="tx-token-leg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'var(--bg-elevated)', borderRadius: 8 }}>
+    <div className="tx-token-leg">
       {logo
         ? <img src={logo} alt={symbol} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         : <div style={{ width: 28, height: 28, borderRadius: '50%', background: `${color}1a`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color, flexShrink: 0 }}>{symbol[0]}</div>
       }
-      <div className="tx-token-leg__body" style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color, fontFamily: 'var(--font-shell-display)' }}>
+      <div className="tx-token-leg__body">
+        <div className="tx-token-leg__amount" style={{ color }}>
           {sign} {amount.toLocaleString('en-US', { maximumFractionDigits: 6 })} {symbol}
         </div>
         {thenPrice > 0 && (
-          <div style={{ fontSize: 11, color: 'var(--fg-subtle)', marginTop: 1 }}>
+          <div className="tx-token-leg__pricing">
             Then: <span style={{ color: 'var(--fg-muted)' }}>{fmtPrice(thenPrice)}</span>
             {nowPrice > 0 && (
               <>
