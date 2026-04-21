@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Wallet as WalletIcon,
   Coins,
@@ -72,6 +72,8 @@ import { MarketWatchModal } from './components/MarketWatchModal';
 import { TransactionList } from './components/TransactionList';
 import { HoldingsTable } from './components/HoldingsTable';
 import type { HoldingDisplayAsset, HoldingSortField } from './components/HoldingsTable';
+import { CoinList, type CoinListItem } from './components/CoinList';
+import { PulseBoardFeed } from './components/PulseBoardFeed';
 import { normalizeTransactions } from './utils/normalizeTransactions';
 import { buildInvestmentRows } from './utils/buildInvestmentRows';
 import { scheduleLocalStorageWrite, resolveBlockscoutBase, resolveEtherscanCompatBase } from './utils/localStorageDebounce';
@@ -3403,6 +3405,34 @@ export default function App() {
       .slice(0, 8);
   }, [currentAssets]);
 
+  const frontPageCoinItems = useMemo<CoinListItem[]>(() => {
+    return frontPagePortfolioRows.map((asset) => {
+      const assetAddress = (asset as any).address;
+      const addressKey = assetAddress?.toLowerCase?.() ?? '';
+      const md = tokenMarketData[asset.id];
+      const logoUrl = STATIC_LOGOS[addressKey] || (asset as any).logoUrl || tokenLogos[addressKey] || getTokenLogoUrl(asset);
+      const plsUsdPrice = prices['pulsechain']?.usd || 0;
+
+      return {
+        id: asset.id,
+        name: asset.name,
+        symbol: asset.symbol,
+        chain: asset.chain,
+        logoUrl,
+        contractAddress: assetAddress,
+        priceUsd: asset.price,
+        pricePls: plsUsdPrice > 0 ? asset.price / plsUsdPrice : undefined,
+        change24h: asset.pnl24h ?? asset.priceChange24h ?? 0,
+        balance: asset.balance,
+        valueUsd: asset.value,
+        valuePls: plsUsdPrice > 0 ? asset.value / plsUsdPrice : undefined,
+        liquidityUsd: md?.liquidity ?? null,
+        volume24hUsd: md?.volume24h ?? null,
+        pools: md?.pairsCount ?? null,
+      };
+    });
+  }, [frontPagePortfolioRows, tokenMarketData, tokenLogos, prices, getTokenLogoUrl]);
+
   const investmentRows = useMemo(() => {
     const ethUsdPrice = prices['ethereum']?.usd
       || prices['ethereum:native']?.usd
@@ -3424,6 +3454,49 @@ export default function App() {
       { chain: 'base', value: 8 },
     ];
   }, [summary.chainDistribution]);
+
+  const frontPagePulseTips = useMemo(() => {
+    const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+    const latestPulseFlow = currentTransactions
+      .filter(tx => tx.chain === 'pulsechain' && (tx.type === 'deposit' || tx.type === 'swap'))
+      .sort((a, b) => b.timestamp - a.timestamp)[0];
+    const mover = [...topHoldingCards]
+      .filter(token => token.change24h != null)
+      .sort((a, b) => Math.abs(b.change24h ?? 0) - Math.abs(a.change24h ?? 0))[0];
+    const offChainCapital = currentAssets
+      .filter(asset => asset.chain === 'ethereum' || asset.chain === 'base')
+      .reduce((sum, asset) => sum + asset.value, 0);
+    const largestHolding = frontPagePortfolioRows[0];
+
+    return [
+      latestPulseFlow ? {
+        tag: 'Flow',
+        title: `${latestPulseFlow.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${latestPulseFlow.asset} reached PulseChain`,
+        body: latestPulseFlow.type === 'deposit'
+          ? 'Fresh capital or bridged inventory just landed on PulseChain.'
+          : 'A recent swap rotated capital into a new PulseChain position.',
+        meta: dateFmt.format(new Date(latestPulseFlow.timestamp)),
+      } : null,
+      mover ? {
+        tag: 'Momentum',
+        title: `${mover.symbol} is moving the board`,
+        body: `${mover.change24h! >= 0 ? '+' : ''}${mover.change24h!.toFixed(2)}% on the active PulseBoard window.`,
+        meta: 'PulseBoard',
+      } : null,
+      offChainCapital > 0 ? {
+        tag: 'Bridge watch',
+        title: `$${offChainCapital.toLocaleString('en-US', { maximumFractionDigits: 0 })} still sits on Ethereum or Base`,
+        body: 'There is still capital outside PulseChain if you want to watch new bridge arrivals.',
+        meta: 'Cross-chain',
+      } : null,
+      largestHolding ? {
+        tag: 'Concentration',
+        title: `${largestHolding.symbol} is still the anchor position`,
+        body: `${((largestHolding.value / Math.max(summary.totalValue, 1)) * 100).toFixed(1)}% of current net worth is concentrated in this coin.`,
+        meta: 'Allocation',
+      } : null,
+    ].filter(Boolean) as Array<{ tag: string; title: string; body: string; meta: string }>;
+  }, [currentAssets, currentTransactions, frontPagePortfolioRows, summary.totalValue, topHoldingCards]);
 
   const frontPageMarketStats = useMemo(() => {
     const totalVolume = topHoldingCards.reduce((sum, token) => sum + (token.volume24h || 0), 0);
@@ -3615,7 +3688,7 @@ export default function App() {
             <img src={BRAND_ASSETS.logo} alt="Pulseport logo" style={{ width: 18, height: 18 }} />
           </div>
           <div style={{ minWidth: 0 }}>
-            <img src={BRAND_ASSETS.wordmark} alt="Pulseport wordmark" style={{ width: 112, height: 'auto' }} />
+            <span className="app-brand-wordmark">PulsePort</span>
           </div>
         </div>
 
@@ -3840,7 +3913,7 @@ export default function App() {
                 <section className="premium-home-hero">
                   <div className="premium-home-stack">
                     <div className="premium-home-value-card">
-                      <span className="premium-home-kicker">Capital Stack</span>
+                      <span className="premium-home-kicker">My Net Worth</span>
                       <strong>${summary.totalValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>
                       <small>
                         {summary.netInvestment > MIN_INVESTMENT_THRESHOLD
@@ -3889,37 +3962,72 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="premium-home-holdings">
+                    <div className="premium-home-panel premium-home-panel--allocation">
                       <div className="premium-home-panel-head">
                         <div>
-                          <span>My Holdings</span>
-                          <h2>{wallets.length > 0 ? 'Current bag' : 'Add a wallet to build your bag view'}</h2>
+                          <span>Coin allocation</span>
+                          <h2>See how the bag is weighted right now.</h2>
                         </div>
-                        <button className="front-inline-link" onClick={() => wallets.length > 0 ? setActiveTab('overview') : setIsAddingWallet(true)}>
-                          {wallets.length > 0 ? 'Open portfolio' : 'Add wallet'} <ChevronRight size={14} />
-                        </button>
                       </div>
-                      <div className="premium-home-holding-list">
-                        {frontPagePortfolioRows.slice(0, 8).map(asset => {
-                          const logo = STATIC_LOGOS[(asset as any).address?.toLowerCase?.()] || (asset as any).logoUrl || tokenLogos[(asset as any).address?.toLowerCase?.()] || getTokenLogoUrl(asset);
-                          const dayMove = asset.pnl24h ?? asset.priceChange24h ?? 0;
-                          return (
-                            <button key={asset.id} className="premium-home-holding-row" onClick={() => { setActiveTab('overview'); setOverviewTokenSearch(asset.symbol); }}>
-                              <span className="front-holding-logo">{logo ? <img src={logo} alt={asset.symbol} /> : asset.symbol.slice(0, 1)}</span>
-                              <span className="front-holding-copy">
-                                <strong>{asset.symbol}</strong>
-                                <small>{asset.name}</small>
-                              </span>
-                              <span className="front-holding-value">
-                                <strong>${asset.value.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>
-                                <small className={dayMove >= 0 ? 'is-up' : 'is-down'}>
-                                  {dayMove >= 0 ? '+' : ''}{dayMove.toFixed(2)}%
-                                </small>
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
+                      {(() => {
+                        const allocationColors = ['#00d68f', '#7c5cff', '#f739ff', '#fb923c', '#60a5fa', '#94a3b8'];
+                        const allocationRows = frontPagePortfolioRows.slice(0, 5);
+                        const otherValue = Math.max(0, frontPagePortfolioRows.slice(5).reduce((sum, asset) => sum + asset.value, 0));
+                        const totalValue = Math.max(summary.totalValue, allocationRows.reduce((sum, asset) => sum + asset.value, 0) + otherValue);
+                        const allocationData = [
+                          ...allocationRows.map((asset, index) => ({
+                            label: asset.symbol,
+                            detail: asset.name,
+                            value: asset.value,
+                            color: allocationColors[index % allocationColors.length],
+                          })),
+                          ...(otherValue > 0 ? [{ label: 'Other', detail: 'Remaining holdings', value: otherValue, color: allocationColors[5] }] : []),
+                        ];
+
+                        return (
+                          <>
+                            <div className="front-allocation-chart">
+                              <ResponsiveContainer width="100%" height={220}>
+                                <PieChart>
+                                  <Pie
+                                    data={allocationData}
+                                    dataKey="value"
+                                    nameKey="label"
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={58}
+                                    outerRadius={84}
+                                    paddingAngle={2}
+                                    stroke="none"
+                                  >
+                                    {allocationData.map((entry) => (
+                                      <Cell key={entry.label} fill={entry.color} />
+                                    ))}
+                                  </Pie>
+                                </PieChart>
+                              </ResponsiveContainer>
+                            </div>
+                            <div className="front-allocation-legend">
+                              {allocationData.map((entry) => {
+                                const share = totalValue > 0 ? (entry.value / totalValue) * 100 : 0;
+                                return (
+                                  <div className="front-allocation-row" key={entry.label}>
+                                    <div>
+                                      <span style={{ background: entry.color }} />
+                                      <strong>{entry.label}</strong>
+                                      <small>{entry.detail}</small>
+                                    </div>
+                                    <div>
+                                      <strong>$${entry.value.toLocaleString('en-US', { maximumFractionDigits: 0 })}</strong>
+                                      <small>{share.toFixed(1)}%</small>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
@@ -3983,33 +4091,11 @@ export default function App() {
                         );
                       })}
                     </div>
+                    <PulseBoardFeed items={frontPagePulseTips} />
                   </div>
                 </section>
 
-                <section className="premium-home-lower">
-                  <div className="premium-home-panel">
-                    <div className="premium-home-panel-head">
-                      <div>
-                        <span>Recent transactions</span>
-                        <h2>Move fast, then drill in when needed.</h2>
-                      </div>
-                      <button className="front-inline-link" onClick={() => setActiveTab('history')}>
-                        Open transactions <ChevronRight size={14} />
-                      </button>
-                    </div>
-                    <TransactionList
-                      transactions={currentTransactions.filter(tx => tx.chain === 'pulsechain').slice(0, 4)}
-                      viewAsYou={viewAsYou}
-                      wallets={wallets}
-                      compact
-                      assets={currentAssets}
-                      getTokenLogoUrl={getTokenLogoUrl}
-                      tokenLogos={tokenLogos}
-                      onFilterByAsset={symbol => { setTxAssetFilter(symbol); setActiveTab('history'); }}
-                      emptyMessage="No transactions yet."
-                    />
-                  </div>
-
+                <section className="premium-home-lower premium-home-lower--single">
                   <div className="premium-home-panel premium-home-panel--intel">
                     <div className="premium-home-panel-head">
                       <div>
@@ -4478,17 +4564,17 @@ export default function App() {
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                       <span style={{ fontSize: 12, color: t.textMuted }}>Principal</span>
-                                      <span style={{ fontSize: 13, fontWeight: 700, color: t.text, fontFamily: 'JetBrains Mono, monospace' }}>{fmtBigNum(r.principal)}</span>
+                                      <span style={{ fontSize: 13, fontWeight: 700, color: t.text, fontFamily: 'var(--font-shell-display)' }}>{fmtBigNum(r.principal)}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                       <span style={{ fontSize: 12, color: t.textMuted }}>Accrued Yield</span>
-                                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', fontFamily: 'JetBrains Mono, monospace' }}>+{fmtBigNum(r.yield)}</span>
+                                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-shell-display)' }}>+{fmtBigNum(r.yield)}</span>
                                     </div>
                                     <div style={{ height: 1, background: t.borderLight, margin: '2px 0' }} />
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                       <span style={{ fontSize: 12, fontWeight: 600, color: t.textSecondary }}>Total</span>
                                       <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: 14, fontWeight: 800, color: r.color, fontFamily: 'JetBrains Mono, monospace' }}>{fmtBigNum(r.total)}</div>
+                                        <div style={{ fontSize: 14, fontWeight: 800, color: r.color, fontFamily: 'var(--font-shell-display)' }}>{fmtBigNum(r.total)}</div>
                                         <div style={{ fontSize: 11, color: t.textMuted }}>${(r.total * r.usdPrice).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                                       </div>
                                     </div>
@@ -4504,6 +4590,49 @@ export default function App() {
                   );
                 })()}
                                </div>
+
+                <div className="premium-home-lower premium-home-lower--portfolio">
+                  <div className="premium-home-holdings">
+                    <div className="premium-home-panel-head">
+                      <div>
+                        <span>My Holdings</span>
+                        <h2>{wallets.length > 0 ? 'Current bag' : 'Add a wallet to build your bag view'}</h2>
+                      </div>
+                      <button className="front-inline-link" onClick={() => wallets.length > 0 ? setOverviewTokenSearch('') : setIsAddingWallet(true)}>
+                        {wallets.length > 0 ? 'Scan holdings' : 'Add wallet'} <ChevronRight size={14} />
+                      </button>
+                    </div>
+                    <CoinList
+                      items={frontPageCoinItems}
+                      variant="compact"
+                      onRowClick={(item) => setOverviewTokenSearch(item.symbol)}
+                      emptyMessage="No holdings yet."
+                    />
+                  </div>
+
+                  <div className="premium-home-panel">
+                    <div className="premium-home-panel-head">
+                      <div>
+                        <span>Recent transactions</span>
+                        <h2>Move fast, then drill in when needed.</h2>
+                      </div>
+                      <button className="front-inline-link" onClick={() => setActiveTab('history')}>
+                        Open transactions <ChevronRight size={14} />
+                      </button>
+                    </div>
+                    <TransactionList
+                      transactions={currentTransactions.filter(tx => tx.chain === 'pulsechain').slice(0, 4)}
+                      viewAsYou={viewAsYou}
+                      wallets={wallets}
+                      compact
+                      assets={currentAssets}
+                      getTokenLogoUrl={getTokenLogoUrl}
+                      tokenLogos={tokenLogos}
+                      onFilterByAsset={symbol => { setTxAssetFilter(symbol); setActiveTab('history'); }}
+                      emptyMessage="No transactions yet."
+                    />
+                  </div>
+                </div>
 
                 {/* -- PORTFOLIO PERFORMANCE -- */}
                 {(() => {
@@ -6381,6 +6510,7 @@ export default function App() {
               currentValue={summary.totalValue}
               liquidValue={summary.liquidValue}
               stakedValue={summary.stakingValueUsd}
+              plsUsdPrice={prices['pulsechain']?.usd || 0}
               rows={investmentRows}
               onOpenPlanner={() => setProfitPlannerOpen(true)}
               onOpenTransactions={(row) => {
@@ -6909,5 +7039,6 @@ export default function App() {
     </div>
   );
 }
+
 
 

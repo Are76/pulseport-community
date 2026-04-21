@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { MyInvestmentsAssetPanel } from '../components/my-investments/MyInvestmentsAssetPanel';
 import { MyInvestmentsHero } from '../components/my-investments/MyInvestmentsHero';
@@ -82,12 +82,20 @@ describe('MyInvestmentsTable', () => {
       },
     ];
 
-    render(<MyInvestmentsTable rows={rows} expandedId={null} onToggleRow={() => {}} onOpenAsset={() => {}} />);
+    render(
+      <MyInvestmentsTable
+        rows={rows}
+        plsUsdPrice={0.000078}
+        portfolioValue={1215.9}
+        expandedId={null}
+        onToggleRow={() => {}}
+        onOpenAsset={() => {}}
+      />
+    );
 
-    const table = screen.getByRole('table');
-    const renderedRows = within(table).getAllByRole('row');
-    expect(renderedRows[1]).toHaveTextContent('INC');
-    expect(renderedRows[2]).toHaveTextContent('PRVX');
+    const assetButtons = screen.getAllByRole('button').filter((node) => ['INC', 'PRVX'].includes(node.textContent || ''));
+    expect(assetButtons[0]).toHaveTextContent('INC');
+    expect(assetButtons[1]).toHaveTextContent('PRVX');
   });
 
   it('expands a row to show source capital and route details', () => {
@@ -96,6 +104,8 @@ describe('MyInvestmentsTable', () => {
       return (
         <MyInvestmentsTable
           rows={[sampleRow]}
+          plsUsdPrice={0.000078}
+          portfolioValue={7201}
           expandedId={expandedId}
           onToggleRow={(id) => setExpandedId(id)}
           onOpenAsset={() => {}}
@@ -103,13 +113,17 @@ describe('MyInvestmentsTable', () => {
       );
     }
 
-    render(<Harness />);
-    fireEvent.click(screen.getByRole('button', { name: /125.54/i }));
+    const { container } = render(<Harness />);
+    const row = container.querySelector('.coin-list-row-main');
+    expect(row).not.toBeNull();
+    fireEvent.click(row!);
 
+    expect(screen.getByText('Position')).toBeInTheDocument();
+    expect(screen.getByText('Market')).toBeInTheDocument();
+    expect(screen.getByText('Actions')).toBeInTheDocument();
     expect(screen.getByText(/Ethereum -> Bridge -> PulseX -> HEX/i)).toBeInTheDocument();
-    expect(screen.getByText(/ETH .* ethereum .* \$721.82/i)).toBeInTheDocument();
-    expect(screen.getByText('Then')).toBeInTheDocument();
-    expect(screen.getAllByText('$721.82').length).toBeGreaterThan(1);
+    expect(screen.getByText('Attribution')).toBeInTheDocument();
+    expect(screen.getByText('$721.82')).toBeInTheDocument();
   });
 });
 
@@ -136,6 +150,7 @@ describe('MyInvestmentsPage', () => {
         currentValue={7201}
         liquidValue={5723}
         stakedValue={1478}
+        plsUsdPrice={0.000078}
         rows={[sampleRow]}
         onOpenPlanner={() => {}}
         onOpenTransactions={() => {}}

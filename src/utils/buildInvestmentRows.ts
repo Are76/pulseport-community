@@ -1,4 +1,4 @@
-import type { Asset, Chain, InvestmentHoldingRow, InvestmentSourceAttribution, Transaction } from '../types';
+﻿import type { Asset, Chain, InvestmentHoldingRow, InvestmentSourceAttribution, Transaction } from '../types';
 
 interface PositionState {
   amount: number;
@@ -53,8 +53,37 @@ function normalizeTxSymbol(asset: string, chain: Chain): string {
     if (STABLE_FAMILIES.has(family)) return `p${family}`;
   }
 
+  if (
+    chain === 'pulsechain'
+    && STABLE_FAMILIES.has(family)
+    && (upper.includes('FORK COPY') || upper.includes('SYSTEM COPY'))
+  ) {
+    return `p${family}`;
+  }
+
   if (family === 'ETH' && upper.includes('WETH')) return 'WETH';
   return family === 'eHEX' ? 'eHEX' : sanitizeSymbol(asset) || family;
+}
+
+function normalizeHoldingSymbol(asset: Pick<Asset, 'symbol' | 'name' | 'chain'>): string {
+  const symbol = (asset.symbol || '').toUpperCase();
+  const name = (asset.name || '').toUpperCase();
+
+  if (asset.chain === 'pulsechain' && symbol === 'WPLS') return 'PLS';
+  if (symbol === 'EHEX' || ((symbol === 'HEX' || symbol === 'EHEX') && name.includes('FROM ETHEREUM'))) return 'eHEX';
+  if (symbol === 'PDAI') return 'pDAI';
+  if (symbol === 'PUSDC') return 'pUSDC';
+  if (symbol === 'PUSDT') return 'pUSDT';
+
+  if (
+    asset.chain === 'pulsechain'
+    && ['DAI', 'USDC', 'USDT'].includes(symbol)
+    && (name.includes('FORK COPY') || name.includes('SYSTEM COPY'))
+  ) {
+    return `p${symbol}`;
+  }
+
+  return asset.symbol;
 }
 
 function assetKey(chain: Chain, symbol: string): string {
@@ -159,7 +188,7 @@ function addToPosition(
 
 function buildRouteSummary(position?: PositionState): string {
   if (!position || position.routes.length === 0) return 'Tracked from imported transaction history';
-  return position.routes.slice(-2).join(' � ');
+  return position.routes.slice(-2).join(' • ');
 }
 
 export function buildInvestmentRows(
@@ -211,7 +240,7 @@ export function buildInvestmentRows(
     .filter((asset) => asset.value > 0)
     .sort((a, b) => b.value - a.value)
     .map((asset) => {
-      const key = assetKey(asset.chain, asset.symbol);
+      const key = assetKey(asset.chain, normalizeHoldingSymbol(asset));
       const position = positions.get(key);
       const costBasis = position?.totalCost ?? 0;
       const pnlUsd = asset.value - costBasis;
@@ -226,6 +255,8 @@ export function buildInvestmentRows(
         symbol: asset.symbol,
         name: asset.name,
         chain: asset.chain,
+        address: asset.address,
+        logoUrl: asset.logoUrl,
         amount: asset.balance,
         currentPrice: asset.price,
         currentValue: asset.value,

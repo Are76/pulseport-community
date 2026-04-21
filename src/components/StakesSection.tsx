@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer,
   Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
-import { Zap, Lock, Activity, Layers, Filter } from 'lucide-react';
+import { Lock, Activity, Layers, Filter } from 'lucide-react';
 import type { HexStake } from '../types';
 import { PHEX_YIELD_PER_TSHARE, EHEX_YIELD_PER_TSHARE } from '../constants';
 
@@ -359,44 +359,37 @@ export function StakesSection({
   return (
     <div className="stakes-section">
 
-      {/* -- 1. Hero: Daily HEX Yield --------------------------------------- */}
-      <div className="stakes-hero-card">
-        <div className="stakes-hero-main">
-          <div className="stakes-hero-title-row">
-            <div className="stakes-hero-icon">
-            <Zap size={26} style={{ color: '#c4b5fd' }} />
+      {/* -- 1. Hero -------------------------------------------------------- */}
+      <div className="premium-home-value-card stakes-value-card">
+        <span className="premium-home-kicker">HEX Staking</span>
+        <strong>{fmtUsd(totalCurrentValueUsd)}</strong>
+        <small>
+          {activeStakes.length} active stake{activeStakes.length !== 1 ? 's' : ''} across PulseChain and Ethereum.
+          {' '}Daily yield {fmtHex(dailyYieldHex)} HEX.
+        </small>
+        <div className="premium-home-stat-grid stakes-value-grid">
+          <div>
+            <span>Daily Yield</span>
+            <strong className="is-up">+{fmtHex(dailyYieldHex)} HEX</strong>
+            <small className="premium-home-stat-note">{fmtUsd(dailyYieldUsd)} estimated per day</small>
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div className="stakes-hero-kicker">HEX staking yield</div>
-            <h1 className="stakes-hero-title">HEX Staking</h1>
+          <div>
+            <span>Maturity Value</span>
+            <strong>{fmtUsd(totalMaturityValueUsd)}</strong>
+            <small className="premium-home-stat-note">{fmtHex(totalMaturityHex)} HEX projected</small>
           </div>
+          <div>
+            <span>Total Yield</span>
+            <strong className="is-up">+{fmtHex(Math.max(0, totalMaturityHex - totalHexStaked))} HEX</strong>
+            <small className="premium-home-stat-note">
+              {totalHexStaked > 0 ? `${((totalMaturityHex / totalHexStaked - 1) * 100).toFixed(1)}% projected yield` : 'waiting for stake data'}
+            </small>
           </div>
-          <p className="stakes-hero-copy">
-            Liquid exposure, active yield, and maturity estimates across PulseChain and Ethereum.
-          </p>
-          <div className="stakes-hero-yield">
-            <span className="stakes-hero-yield-label">Daily HEX Yield</span>
-            <strong className="tabular-nums">{fmtHex(dailyYieldHex)}</strong>
-            <span>{fmtUsd(dailyYieldUsd)} estimated across all active stakes</span>
+          <div>
+            <span>T-Shares</span>
+            <strong>{totalTShares.toLocaleString('en-US', { maximumFractionDigits: 2 })}</strong>
+            <small className="premium-home-stat-note">PulseChain {activePHexStakes.length} • Ethereum {activeEHexStakes.length}</small>
           </div>
-        </div>
-
-        <div className="stakes-hero-mini-stats">
-          {[
-            { label: 'Weekly', value: fmtHex(dailyYieldHex * 7), sub: fmtUsd(dailyYieldUsd * 7), tone: 'yield' },
-            { label: 'Monthly', value: fmtHex(dailyYieldHex * 30), sub: fmtUsd(dailyYieldUsd * 30), tone: 'yield' },
-            { label: 'Annual', value: fmtHex(dailyYieldHex * 365), sub: fmtUsd(dailyYieldUsd * 365), tone: 'yield' },
-            { label: 'Maturity', value: `${fmtHex(totalMaturityHex)} HEX`, sub: `${fmtUsd(totalMaturityValueUsd)} projected`, tone: 'maturity' },
-            { label: 'Total Yield', value: `+${fmtHex(Math.max(0, totalMaturityHex - totalHexStaked))}`, sub: totalHexStaked > 0 ? `${((totalMaturityHex / totalHexStaked - 1) * 100).toFixed(1)}% yield` : 'waiting for stakes', tone: 'maturity' },
-          ].map(({ label, value, sub, tone }) => (
-            <div key={label} className={`stakes-hero-mini-card ${tone}`}>
-              <div className="stakes-hero-mini-label">{label}</div>
-              <div className="stakes-hero-mini-value tabular-nums">
-                {value}
-              </div>
-              <div className="stakes-hero-mini-sub">{sub}</div>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -450,7 +443,7 @@ export function StakesSection({
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--chain-pulse)', boxShadow: '0 0 6px var(--chain-pulse)' }} />
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em' }}>pHEX Staked</span>
           </div>
-          <div className="tabular-nums" style={{ fontSize: 28, fontWeight: 800, color: 'var(--chain-pulse)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '-0.02em', lineHeight: 1 }}>
+          <div className="tabular-nums" style={{ fontSize: 28, fontWeight: 800, color: 'var(--chain-pulse)', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.03em', lineHeight: 1 }}>
             {fmtHex(totalPHex)}
           </div>
           <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 6 }}>
@@ -464,7 +457,7 @@ export function StakesSection({
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--chain-eth)', boxShadow: '0 0 6px var(--chain-eth)' }} />
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em' }}>eHEX Staked</span>
           </div>
-          <div className="tabular-nums" style={{ fontSize: 28, fontWeight: 800, color: 'var(--chain-eth)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '-0.02em', lineHeight: 1 }}>
+          <div className="tabular-nums" style={{ fontSize: 28, fontWeight: 800, color: 'var(--chain-eth)', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.03em', lineHeight: 1 }}>
             {fmtHex(totalEHex)}
           </div>
           <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 6 }}>
@@ -482,7 +475,7 @@ export function StakesSection({
             <Layers size={14} style={{ color: 'var(--fg-subtle)' }} />
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em' }}>HEX Staked</div>
           </div>
-          <div className="tabular-nums" style={{ fontSize: 20, fontWeight: 800, color: 'var(--fg)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '-0.02em', marginBottom: 4 }}>
+          <div className="tabular-nums" style={{ fontSize: 20, fontWeight: 800, color: 'var(--fg)', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.03em', marginBottom: 4 }}>
             {fmtHex(totalHexStaked)}
           </div>
           <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{activeStakes.length} active - {stakes.length - activeStakes.length} inactive</div>
@@ -494,7 +487,7 @@ export function StakesSection({
             <Activity size={14} style={{ color: 'var(--fg-subtle)' }} />
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em' }}>Current Value</div>
           </div>
-          <div className="tabular-nums" style={{ fontSize: 20, fontWeight: 800, color: 'var(--fg)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '-0.02em', marginBottom: 4 }}>
+          <div className="tabular-nums" style={{ fontSize: 20, fontWeight: 800, color: 'var(--fg)', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.03em', marginBottom: 4 }}>
             {fmtUsd(totalCurrentValueUsd)}
           </div>
           <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>at current HEX price</div>
@@ -506,7 +499,7 @@ export function StakesSection({
             <Filter size={14} style={{ color: 'var(--fg-subtle)' }} />
             <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em' }}>T-Shares</div>
           </div>
-          <div className="tabular-nums" style={{ fontSize: 20, fontWeight: 800, color: '#a78bfa', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '-0.02em', marginBottom: 4 }}>
+          <div className="tabular-nums" style={{ fontSize: 20, fontWeight: 800, color: '#a78bfa', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.03em', marginBottom: 4 }}>
             {totalTShares.toLocaleString('en-US', { maximumFractionDigits: 2 })}
           </div>
           <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>across all chains</div>
@@ -627,7 +620,7 @@ export function StakesSection({
                         }
                       }}
                     >
-                      <td style={{ color: 'var(--fg)', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
+                      <td style={{ color: 'var(--fg)', fontWeight: 700, fontFamily: 'var(--font-shell-display)' }}>
                         <span className={`stake-expand-caret${isExpanded ? ' is-open' : ''}`} aria-hidden="true">›</span>
                         #{stake.stakeId}
                       </td>
@@ -647,13 +640,13 @@ export function StakesSection({
                           {tokenLabel}
                         </span>
                       </td>
-                      <td className="col-hide-mobile" style={{ fontSize: 12, color: 'var(--fg-subtle)', fontFamily: "'JetBrains Mono', monospace" }}>
+                      <td className="col-hide-mobile" style={{ fontSize: 12, color: 'var(--fg-subtle)', fontFamily: 'var(--font-shell-display)' }}>
                         {walletLabel}
                       </td>
-                      <td style={{ color: 'var(--fg)', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", textAlign: 'right' }}>
+                      <td style={{ color: 'var(--fg)', fontWeight: 700, fontFamily: 'var(--font-shell-display)', textAlign: 'right' }}>
                         {fmtHex(stakedHex)}
                       </td>
-                      <td className="col-hide-mobile" style={{ textAlign: 'right', fontFamily: "'JetBrains Mono', monospace" }}>
+                      <td className="col-hide-mobile" style={{ textAlign: 'right', fontFamily: 'var(--font-shell-display)' }}>
                         {tShares.toFixed(2)}
                       </td>
                       <td className="col-hide-mobile" style={{ minWidth: 80 }}>
@@ -680,13 +673,13 @@ export function StakesSection({
                           )}
                         </div>
                       </td>
-                      <td className="col-hide-mobile" style={{ textAlign: 'right', color: 'var(--positive)', fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
+                      <td className="col-hide-mobile" style={{ textAlign: 'right', color: 'var(--positive)', fontFamily: 'var(--font-shell-display)', fontSize: 12, fontWeight: 700 }}>
                         +{fmtHex(yieldHex)}
                       </td>
-                      <td style={{ textAlign: 'right', color: 'var(--fg)', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
+                      <td style={{ textAlign: 'right', color: 'var(--fg)', fontWeight: 700, fontFamily: 'var(--font-shell-display)' }}>
                         {fmtUsd(currentValueUsd)}
                       </td>
-                      <td className="col-hide-mobile" style={{ textAlign: 'right', color: 'var(--positive)', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>
+                      <td className="col-hide-mobile" style={{ textAlign: 'right', color: 'var(--positive)', fontFamily: 'var(--font-shell-display)', fontWeight: 700 }}>
                         {fmtHex(maturityHex)} HEX
                       </td>
                     </tr>
@@ -721,20 +714,20 @@ export function StakesSection({
                   <td colSpan={3} style={{ padding: '10px 14px', fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
                     Total ({filteredStakes.length})
                   </td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <td style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-shell-display)' }}>
                     {fmtHex(filteredStakes.reduce((s, st) => s + (st.stakedHex ?? Number(st.stakedHearts ?? 0n) / 1e8), 0))}
                   </td>
                   <td className="col-hide-mobile" />
                   <td className="col-hide-mobile" />
                   <td />
-                  <td className="col-hide-mobile" style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--positive)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <td className="col-hide-mobile" style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--positive)', fontFamily: 'var(--font-shell-display)' }}>
                     +{fmtHex(filteredStakes.reduce((s, st) => {
                       const t = st.tShares ?? Number(st.stakeShares ?? 0n) / 1e12;
                       const r = st.chain === 'pulsechain' ? PHEX_YIELD_PER_TSHARE : EHEX_YIELD_PER_TSHARE;
                       return s + t * (st.stakedDays ?? 0) * r;
                     }, 0))}
                   </td>
-                  <td style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <td style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-shell-display)' }}>
                     {fmtUsd(filteredStakes.reduce((s, st) => {
                       const principal = st.stakedHex ?? Number(st.stakedHearts ?? 0n) / 1e8;
                       const t = st.tShares ?? Number(st.stakeShares ?? 0n) / 1e12;
@@ -744,7 +737,7 @@ export function StakesSection({
                       return s + (principal + accrued) * hp;
                     }, 0))}
                   </td>
-                  <td className="col-hide-mobile" style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--positive)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <td className="col-hide-mobile" style={{ padding: '10px 14px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: 'var(--positive)', fontFamily: 'var(--font-shell-display)' }}>
                     {fmtHex(filteredStakes.reduce((s, st) => s + stakeMaturityHex(st), 0))} HEX
                   </td>
                 </tr>

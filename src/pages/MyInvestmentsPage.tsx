@@ -10,6 +10,7 @@ interface MyInvestmentsPageProps {
   currentValue: number;
   liquidValue: number;
   stakedValue: number;
+  plsUsdPrice: number;
   rows: InvestmentHoldingRow[];
   onOpenPlanner: () => void;
   onOpenTransactions: (row: InvestmentHoldingRow) => void;
@@ -35,6 +36,8 @@ export function MyInvestmentsPage(props: MyInvestmentsPageProps) {
       <MyInvestmentsFilters />
       <MyInvestmentsTable
         rows={props.rows}
+        plsUsdPrice={props.plsUsdPrice}
+        portfolioValue={props.currentValue}
         expandedId={expandedId}
         onToggleRow={(id) => setExpandedId((current) => current === id ? null : id)}
         onOpenAsset={setSelectedAsset}

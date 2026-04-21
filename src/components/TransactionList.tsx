@@ -74,6 +74,32 @@ function fmtPnl(n: number): string {
   return `${n >= 0 ? '+' : ''}$${Math.abs(n).toFixed(dp)}`;
 }
 
+function resolveTransactionUsdValue(
+  tx: Transaction,
+  coinAsset?: Asset,
+  counterAsset?: Asset,
+): number | undefined {
+  if ((tx.valueUsd ?? 0) > 0) return tx.valueUsd;
+
+  if ((tx.assetPriceUsdAtTx ?? 0) > 0 && tx.amount > 0) {
+    return tx.assetPriceUsdAtTx! * tx.amount;
+  }
+
+  if ((tx.counterPriceUsdAtTx ?? 0) > 0 && (tx.counterAmount ?? 0) > 0) {
+    return tx.counterPriceUsdAtTx! * (tx.counterAmount ?? 0);
+  }
+
+  if ((coinAsset?.price ?? 0) > 0 && tx.amount > 0) {
+    return coinAsset!.price * tx.amount;
+  }
+
+  if ((counterAsset?.price ?? 0) > 0 && (tx.counterAmount ?? 0) > 0) {
+    return counterAsset!.price * (tx.counterAmount ?? 0);
+  }
+
+  return undefined;
+}
+
 function txVisual(type: Transaction['type']) {
   switch (type) {
     case 'deposit':  return { Icon: ArrowDownLeft, bg: 'rgba(0,255,159,.10)', color: 'var(--accent)',  label: 'Received' } as const;
@@ -256,6 +282,7 @@ export function TransactionList({
 
         const coinAsset = findAsset(tx.asset, tx.chain);
         const counterAsset = tx.counterAsset ? findAsset(tx.counterAsset, tx.chain) : undefined;
+        const resolvedUsdValue = resolveTransactionUsdValue(tx, coinAsset, counterAsset);
         const coinLogo  = getLogoUrl(tx.asset, tx.chain);
         const explorerBase = EXPLORER[tx.chain] ?? 'https://scan.pulsechain.com';
         const fromLabel = displayAddr(tx.from);
@@ -336,9 +363,9 @@ export function TransactionList({
                       : isSwapLegOnly
                         ? `Paid ${tx.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} ${tx.asset}`
                       : `${tx.amount.toLocaleString('en-US', { maximumFractionDigits: 4 })} ${tx.asset}`}
-                      {!compact && tx.valueUsd != null && (
+                      {!compact && resolvedUsdValue != null && (
                         <span className="tx-card__usd">
-                          ~ ${tx.valueUsd.toLocaleString('en-US', { maximumFractionDigits: 2 })}
+                          ~ ${resolvedUsdValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                         </span>
                       )}
                     </div>
@@ -349,9 +376,9 @@ export function TransactionList({
               {/* Right: actions */}
               <div className="tx-card__actions">
                 <div className="tx-card__side-meta">
-                  {tx.valueUsd != null && (
+                  {resolvedUsdValue != null && (
                     <span className="tx-card__side-value">
-                      ${tx.valueUsd.toLocaleString('en-US', { maximumFractionDigits: compact ? 0 : 2 })}
+                      ${resolvedUsdValue.toLocaleString('en-US', { maximumFractionDigits: compact ? 0 : 2 })}
                     </span>
                   )}
                   <span className="tx-card__side-time">
@@ -396,9 +423,9 @@ export function TransactionList({
             {/* -- Expanded detail panel ----------------------------------- */}
             {isExpanded && (
               <div className="tx-card__detail-panel" style={{ padding: '0 18px 14px', background: 'var(--bg-inset, var(--bg-elevated))' }}>
-                {isSwap
-                  ? <SwapDetail tx={tx} coinAsset={coinAsset} counterAsset={counterAsset} coinLogo={coinLogo} getLogoUrl={getLogoUrl} displayAddr={displayAddr} isOwn={isOwn} explorerBase={explorerBase} onFilterByAsset={onFilterByAsset} />
-                  : <TransferDetail tx={tx} isDeposit={isDeposit} coinAsset={coinAsset} displayAddr={displayAddr} isOwn={isOwn} explorerBase={explorerBase} />
+                {isSwap || isSwapLegOnly
+                  ? <SwapDetail tx={tx} coinAsset={coinAsset} counterAsset={counterAsset} coinLogo={coinLogo} getLogoUrl={getLogoUrl} displayAddr={displayAddr} isOwn={isOwn} explorerBase={explorerBase} onFilterByAsset={onFilterByAsset} resolvedUsdValue={resolvedUsdValue} />
+                  : <TransferDetail tx={tx} isDeposit={isDeposit} coinAsset={coinAsset} displayAddr={displayAddr} isOwn={isOwn} explorerBase={explorerBase} resolvedUsdValue={resolvedUsdValue} />
                 }
               </div>
             )}
@@ -420,20 +447,22 @@ interface SwapDetailProps {
   isOwn: (addr: string | undefined) => boolean;
   explorerBase: string;
   onFilterByAsset?: (symbol: string) => void;
+  resolvedUsdValue?: number;
 }
 
-function SwapDetail({ tx, coinAsset, counterAsset, coinLogo, getLogoUrl, displayAddr, isOwn, explorerBase, onFilterByAsset }: SwapDetailProps) {
+function SwapDetail({ tx, coinAsset, counterAsset, coinLogo, getLogoUrl, displayAddr, isOwn, explorerBase, onFilterByAsset, resolvedUsdValue }: SwapDetailProps) {
   const counterLogo = tx.counterAsset ? getLogoUrl(tx.counterAsset, tx.chain) : '';
+  const isPartialSwap = !!tx.swapLegOnly || !tx.counterAsset;
 
   // Performance tracking
   const nowPriceReceived = coinAsset?.price ?? 0;
   const nowPriceSpent = counterAsset?.price ?? 0;
-  const thenPriceReceived = tx.assetPriceUsdAtTx ?? (tx.valueUsd && tx.amount > 0 ? tx.valueUsd / tx.amount : 0);
-  const thenPriceSpent = tx.counterPriceUsdAtTx ?? (tx.valueUsd && tx.counterAmount && tx.counterAmount > 0 ? tx.valueUsd / tx.counterAmount : 0);
+  const thenPriceReceived = tx.assetPriceUsdAtTx ?? (resolvedUsdValue && tx.amount > 0 ? resolvedUsdValue / tx.amount : 0);
+  const thenPriceSpent = tx.counterPriceUsdAtTx ?? (resolvedUsdValue && tx.counterAmount && tx.counterAmount > 0 ? resolvedUsdValue / tx.counterAmount : 0);
 
   // P&L: dollar value of received tokens at current price vs entry cost
-  const dollarPnl = tx.valueUsd != null && nowPriceReceived > 0
-    ? (tx.amount * nowPriceReceived) - tx.valueUsd
+  const dollarPnl = resolvedUsdValue != null && nowPriceReceived > 0
+    ? (tx.amount * nowPriceReceived) - resolvedUsdValue
     : null;
 
   return (
@@ -474,7 +503,7 @@ function SwapDetail({ tx, coinAsset, counterAsset, coinLogo, getLogoUrl, display
                 Position P/L
               </span>
             </div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: dollarPnl >= 0 ? 'var(--accent)' : '#ef4444', fontFamily: 'JetBrains Mono, monospace' }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: dollarPnl >= 0 ? 'var(--accent)' : '#ef4444', fontFamily: 'var(--font-shell-display)' }}>
               {fmtPnl(dollarPnl)}
             </div>
             <div style={{ fontSize: 10, color: 'var(--fg-subtle)' }}>At current prices</div>
@@ -482,24 +511,47 @@ function SwapDetail({ tx, coinAsset, counterAsset, coinLogo, getLogoUrl, display
         </div>
       )}
 
-      {/* Received leg */}
-      <div className="tx-token-leg-kicker" style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.55px', marginBottom: 5 }}>
-        Got
-      </div>
-      <TokenLeg
-        logo={coinLogo}
-        symbol={tx.asset}
-        amount={tx.amount}
-        sign="+"
-        color="var(--accent)"
-        thenPrice={thenPriceReceived}
-        nowPrice={nowPriceReceived}
-        explorerUrl={`${explorerBase}/tx/${tx.hash}`}
-        onFilter={onFilterByAsset ? () => onFilterByAsset(tx.asset) : undefined}
-      />
+      {isPartialSwap ? (
+        <>
+          <div className="tx-token-leg-kicker" style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.55px', marginBottom: 5 }}>
+            Paid
+          </div>
+          <TokenLeg
+            logo={coinLogo}
+            symbol={tx.asset}
+            amount={tx.amount}
+            sign="-"
+            color="#ef4444"
+            thenPrice={thenPriceReceived}
+            nowPrice={nowPriceReceived}
+            explorerUrl={`${explorerBase}/tx/${tx.hash}`}
+            onFilter={onFilterByAsset ? () => onFilterByAsset(tx.asset) : undefined}
+          />
+          <div style={{ marginTop: 8, fontSize: 11, color: 'var(--fg-subtle)' }}>
+            Counterparty token was not returned by the explorer for this hash.
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="tx-token-leg-kicker" style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.55px', marginBottom: 5 }}>
+            Got
+          </div>
+          <TokenLeg
+            logo={coinLogo}
+            symbol={tx.asset}
+            amount={tx.amount}
+            sign="+"
+            color="var(--accent)"
+            thenPrice={thenPriceReceived}
+            nowPrice={nowPriceReceived}
+            explorerUrl={`${explorerBase}/tx/${tx.hash}`}
+            onFilter={onFilterByAsset ? () => onFilterByAsset(tx.asset) : undefined}
+          />
+        </>
+      )}
 
       {/* Spent leg */}
-      {tx.counterAsset != null && tx.counterAmount != null && (
+      {!isPartialSwap && tx.counterAsset != null && tx.counterAmount != null && (
         <div style={{ marginTop: 6 }}>
           <div className="tx-token-leg-kicker" style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.55px', marginBottom: 5 }}>
             Paid
@@ -547,7 +599,7 @@ function TokenLeg({ logo, symbol, amount, sign, color, thenPrice, nowPrice, expl
         : <div style={{ width: 28, height: 28, borderRadius: '50%', background: `${color}1a`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color, flexShrink: 0 }}>{symbol[0]}</div>
       }
       <div className="tx-token-leg__body" style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color, fontFamily: 'JetBrains Mono, monospace' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color, fontFamily: 'var(--font-shell-display)' }}>
           {sign} {amount.toLocaleString('en-US', { maximumFractionDigits: 6 })} {symbol}
         </div>
         {thenPrice > 0 && (
@@ -584,11 +636,12 @@ interface TransferDetailProps {
   displayAddr: (addr: string | undefined) => string;
   isOwn: (addr: string | undefined) => boolean;
   explorerBase: string;
+  resolvedUsdValue?: number;
 }
 
-function TransferDetail({ tx, isDeposit, coinAsset, displayAddr, isOwn, explorerBase }: TransferDetailProps) {
+function TransferDetail({ tx, isDeposit, coinAsset, displayAddr, isOwn, explorerBase, resolvedUsdValue }: TransferDetailProps) {
   const currentValue = coinAsset ? tx.amount * coinAsset.price : null;
-  const pnl = currentValue != null && tx.valueUsd != null ? currentValue - tx.valueUsd : null;
+  const pnl = currentValue != null && resolvedUsdValue != null ? currentValue - resolvedUsdValue : null;
 
   const stats: Array<{ label: string; val: string; sub: string; color?: string }> = [
     {
@@ -598,7 +651,7 @@ function TransferDetail({ tx, isDeposit, coinAsset, displayAddr, isOwn, explorer
     },
     {
       label: 'USD at Entry',
-      val: tx.valueUsd != null ? `$${tx.valueUsd.toLocaleString('en-US', { maximumFractionDigits: 2 })}` : '-',
+      val: resolvedUsdValue != null ? `$${resolvedUsdValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}` : '-',
       sub: 'Value at time of tx',
     },
     {
@@ -610,15 +663,15 @@ function TransferDetail({ tx, isDeposit, coinAsset, displayAddr, isOwn, explorer
       label: 'Current Value',
       val: currentValue != null ? `$${currentValue.toLocaleString('en-US', { maximumFractionDigits: 2 })}` : '-',
       sub: 'If held to now',
-      color: currentValue != null && tx.valueUsd != null
-        ? currentValue >= tx.valueUsd ? 'var(--accent)' : '#ef4444'
+      color: currentValue != null && resolvedUsdValue != null
+        ? currentValue >= resolvedUsdValue ? 'var(--accent)' : '#ef4444'
         : undefined,
     },
     ...(pnl !== null ? [{
       label: 'Profit / Loss',
       val: `${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toLocaleString('en-US', { maximumFractionDigits: 2 })}`,
-      sub: tx.valueUsd
-        ? `${(((currentValue! / tx.valueUsd) - 1) * 100).toFixed(1)}% change`
+      sub: resolvedUsdValue
+        ? `${(((currentValue! / resolvedUsdValue) - 1) * 100).toFixed(1)}% change`
         : '',
       color: pnl >= 0 ? 'var(--accent)' : '#ef4444',
     }] : []),

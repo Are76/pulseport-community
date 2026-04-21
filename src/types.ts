@@ -37,6 +37,8 @@ export interface InvestmentHoldingRow {
   symbol: string;
   name: string;
   chain: Chain;
+  address?: string;
+  logoUrl?: string;
   amount: number;
   currentPrice: number;
   currentValue: number;
@@ -121,7 +123,7 @@ export interface LpPositionEnriched extends LpPosition {
   pendingIncUsd?: number;
   walletLpBalance: number;   // LP tokens held in wallet (normalised to 1e18)
   stakedLpBalance: number;   // LP tokens staked in MasterChef (normalised to 1e18)
-  sparkline: { t: number; v: number }[];  // 7 points, approximate - totalUsd ± small variance
+  sparkline: { t: number; v: number }[];  // 7 points, approximate - totalUsd ï¿½ small variance
 }
 
 export interface PortfolioSummary {

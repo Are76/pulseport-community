@@ -110,4 +110,66 @@ describe('buildInvestmentRows', () => {
     expect(rows[0].costBasis).toBeCloseTo(500, 4);
     expect(rows[0].sourceMix[0]).toEqual({ asset: 'DAI', chain: 'ethereum', amountUsd: 500 });
   });
+
+  it('maps PulseChain fork-copy stable swap outputs into p-token holdings', () => {
+    const currentPDai: Asset = {
+      id: 'pdai',
+      symbol: 'pDAI',
+      name: 'DAI (System Copy)',
+      balance: 40000,
+      price: 0.0018,
+      value: 72,
+      chain: 'pulsechain',
+    };
+
+    const txs: Transaction[] = [
+      {
+        id: 'eth-in',
+        hash: '0xc1',
+        timestamp: 1,
+        type: 'deposit',
+        from: '0xext',
+        to: '0xme',
+        asset: 'ETH',
+        amount: 1,
+        valueUsd: 2000,
+        chain: 'ethereum',
+      },
+      {
+        id: 'bridge-in',
+        hash: '0xc2',
+        timestamp: 2,
+        type: 'deposit',
+        from: '0xbridge',
+        to: '0xme',
+        asset: 'WETH (from Ethereum)',
+        amount: 1,
+        valueUsd: 2000,
+        chain: 'pulsechain',
+        bridged: true,
+      },
+      {
+        id: 'pdai-buy',
+        hash: '0xc3',
+        timestamp: 3,
+        type: 'swap',
+        from: '0xme',
+        to: '0xrouter',
+        asset: 'DAI (FORK COPY)',
+        amount: 40000,
+        valueUsd: 2000,
+        chain: 'pulsechain',
+        counterAsset: 'WETH (from Ethereum)',
+        counterAmount: 1,
+      },
+    ];
+
+    const rows = buildInvestmentRows([currentPDai], txs, 2000);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].costBasis).toBeCloseTo(2000, 4);
+    expect(rows[0].sourceMix).toEqual([
+      { asset: 'ETH', chain: 'ethereum', amountUsd: 2000 },
+    ]);
+  });
 });
