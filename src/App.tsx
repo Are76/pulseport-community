@@ -5451,26 +5451,16 @@ export default function App() {
 
 
         {activeTab === 'history' && (
-            <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="transaction-page-shell space-y-4">
+            <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="transaction-page-shell transaction-page-shell--reset space-y-4">
 
-            {/* Page header */}
-            <div className="transaction-page-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                <div>
-                  <div className="transaction-page-kicker">PulseChain activity</div>
-                  <div className="transaction-page-title">Transactions</div>
-                  <div className="transaction-page-subtitle">Swaps, received, and sent activity for tracked PulseChain wallets.</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="tx-module-card tx-module-card--history">
-              <div className="tx-module-header" style={{ borderBottom: isCollapsed('holdings-txs') ? 'none' : '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', minWidth: 0 }}>
+            <div className="transaction-ledger-shell">
+              <div className="transaction-ledger-toolbar">
+                <div className="transaction-ledger-title">
                   <History size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--fg)' }}>Transaction</span>
-                  <span style={{ fontSize: 12, color: 'var(--accent)', background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>PulseChain</span>
-                  <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{filteredTransactions.length} tx</span>
+                  <div>
+                    <strong>Transactions</strong>
+                    <span>{filteredTransactions.length} PulseChain rows</span>
+                  </div>
                 </div>
                 <div className="transaction-toolbar">
                   <button type="button" className={`filter-pill${viewAsYou ? ' active' : ''}`} onClick={() => setViewAsYou(v => !v)}>
@@ -5501,51 +5491,44 @@ export default function App() {
                   >
                     <Download size={12} /> CSV
                   </button>
-                  <button onClick={() => toggleSection('holdings-txs')}
-                    style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: t.textTertiary, flexShrink: 0 }}
-                    title={isCollapsed('holdings-txs') ? 'Expand' : 'Collapse'}>
-                    {isCollapsed('holdings-txs') ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-                  </button>
                 </div>
               </div>
-              {!isCollapsed('holdings-txs') && (
-                <>
-                  <div className="tx-filter-row history-filter-row" style={{ padding: '10px 18px', borderBottom: `1px solid ${t.border}`, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {([
-                      { value: txTypeFilter, onChange: setTxTypeFilter, options: [['all','All Types'],['deposit','Received'],['withdraw','Sent'],['swap','Swaps']] as [string,string][] },
-                      { value: txAssetFilter, onChange: setTxAssetFilter, options: [['all','All Tokens'], ...Array.from(new Set(currentTransactions.filter(tx => tx.chain === 'pulsechain').flatMap(tx => [tx.asset, tx.counterAsset].filter(Boolean) as string[]))).sort().map(a => [a,a])] as [string,string][] },
-                      { value: txYearFilter, onChange: setTxYearFilter, options: [['all','All Years'],['2026','2026'],['2025','2025'],['2024','2024'],['2023','2023'],['2022','2022'],['2021','2021']] as [string,string][] },
-                      { value: txCoinCategory, onChange: setTxCoinCategory, options: [['all','All Coins'],['stablecoins','Stablecoins'],['eth_weth','ETH/WETH'],['hex','HEX/eHEX'],['pls_wpls','PLS/WPLS'],['bridged','Bridged']] as [string,string][] },
-                    ]).map(({ value, onChange, options }) => (
-                      <select key={options[0][1]} value={value} onChange={e => onChange(e.target.value)}
-                        className="history-filter-select"
-                        style={{ background: 'var(--bg-elevated)', border: `1px solid ${t.border}`, borderRadius: 6, color: 'var(--fg)', fontSize: 13, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
-                        {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                      </select>
-                    ))}
-                    <button onClick={() => { setTxTypeFilter('all'); setTxAssetFilter('all'); setTxYearFilter('all'); setTxCoinCategory('all'); }}
-                      style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-subtle)', background: 'none', border: 'none', cursor: 'pointer', padding: '5px 8px', textDecoration: 'underline' }}>
-                      Clear all
-                    </button>
-                  </div>
-                  <div className="custom-scrollbar tx-module-list wallet-tx-list">
-                    <TransactionList
-                      transactions={filteredTransactions}
-                      viewAsYou={viewAsYou}
-                      wallets={wallets}
-                      compact={txCompact}
-                      assets={currentAssets}
-                      getTokenLogoUrl={getTokenLogoUrl}
-                      tokenLogos={tokenLogos}
-                      hideIds={hiddenTxIds}
-                      onToggleHide={id => setHiddenTxIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
-                      showHidden={showHiddenTxs}
-                      onFilterByAsset={symbol => setTxAssetFilter(symbol)}
-                      emptyMessage="No transactions found for these filters."
-                    />
-                  </div>
-                </>
-              )}
+
+              <div className="transaction-ledger-filters history-filter-row">
+                {([
+                  { value: txTypeFilter, onChange: setTxTypeFilter, options: [['all','All Types'],['deposit','Received'],['withdraw','Sent'],['swap','Swaps']] as [string,string][] },
+                  { value: txAssetFilter, onChange: setTxAssetFilter, options: [['all','All Tokens'], ...Array.from(new Set(currentTransactions.filter(tx => tx.chain === 'pulsechain').flatMap(tx => [tx.asset, tx.counterAsset].filter(Boolean) as string[]))).sort().map(a => [a,a])] as [string,string][] },
+                  { value: txYearFilter, onChange: setTxYearFilter, options: [['all','All Years'],['2026','2026'],['2025','2025'],['2024','2024'],['2023','2023'],['2022','2022'],['2021','2021']] as [string,string][] },
+                  { value: txCoinCategory, onChange: setTxCoinCategory, options: [['all','All Coins'],['stablecoins','Stablecoins'],['eth_weth','ETH/WETH'],['hex','HEX/eHEX'],['pls_wpls','PLS/WPLS'],['bridged','Bridged']] as [string,string][] },
+                ]).map(({ value, onChange, options }) => (
+                  <select key={options[0][1]} value={value} onChange={e => onChange(e.target.value)}
+                    className="history-filter-select"
+                    style={{ background: 'var(--bg-elevated)', border: `1px solid ${t.border}`, borderRadius: 6, color: 'var(--fg)', fontSize: 13, padding: '5px 10px', cursor: 'pointer', outline: 'none' }}>
+                    {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                ))}
+                <button onClick={() => { setTxTypeFilter('all'); setTxAssetFilter('all'); setTxYearFilter('all'); setTxCoinCategory('all'); }}
+                  style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-subtle)', background: 'none', border: 'none', cursor: 'pointer', padding: '5px 8px', textDecoration: 'underline' }}>
+                  Clear all
+                </button>
+              </div>
+
+              <div className="transaction-ledger-list custom-scrollbar">
+                <TransactionList
+                  transactions={filteredTransactions}
+                  viewAsYou={viewAsYou}
+                  wallets={wallets}
+                  compact={txCompact}
+                  assets={currentAssets}
+                  getTokenLogoUrl={getTokenLogoUrl}
+                  tokenLogos={tokenLogos}
+                  hideIds={hiddenTxIds}
+                  onToggleHide={id => setHiddenTxIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])}
+                  showHidden={showHiddenTxs}
+                  onFilterByAsset={symbol => setTxAssetFilter(symbol)}
+                  emptyMessage="No transactions found for these filters."
+                />
+              </div>
             </div>
 
             {/* -- TOKEN P&L SUMMARY CARD - shown when a specific asset filter is active -- */}
