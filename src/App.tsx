@@ -3822,7 +3822,7 @@ export default function App() {
                     <span className="wallet-dot wallet-dot-multi" />
                     All wallets
                   </span>
-                  <span style={{ fontSize: 10, color: 'var(--fg-subtle)', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <span style={{ fontSize: 10, color: 'var(--fg-subtle)', fontFamily: 'var(--font-shell-display)', fontWeight: 700, letterSpacing: '-0.01em' }}>
                     ${currentAssets.reduce((sum, asset) => sum + asset.value, 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                   </span>
                 </button>
@@ -3852,7 +3852,7 @@ export default function App() {
                           <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? 'var(--accent)' : 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.name}</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                             <code style={{ fontSize: 10, color: 'var(--fg-muted)' }}>{w.address.slice(0,6)}...{w.address.slice(-4)}</code>
-                            <span style={{ fontSize: 10, color: isActive ? 'var(--accent)' : 'var(--fg-subtle)', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: 10, color: isActive ? 'var(--accent)' : 'var(--fg-subtle)', fontFamily: 'var(--font-shell-display)', fontWeight: 700, letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
                               {walletValue > 0 ? `$${walletValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '$0'}
                             </span>
                           </div>
@@ -4019,8 +4019,8 @@ export default function App() {
                     <div className="premium-home-panel premium-home-panel--allocation">
                       <div className="premium-home-panel-head">
                         <div>
-                          <span>Coin allocation</span>
-                          <h2>See the bag hierarchy instantly.</h2>
+                          <span>Portfolio mix</span>
+                          <h2>Weight, concentration, and dominant positions.</h2>
                         </div>
                       </div>
                       {(() => {
@@ -4642,7 +4642,7 @@ export default function App() {
                     <div className="premium-home-panel premium-home-panel--moves">
                       <div className="premium-home-panel-head">
                         <div>
-                          <span>Next moves</span>
+                          <span>Command deck</span>
                           <h2>Open the tools that matter right now.</h2>
                         </div>
                         <button className="front-inline-link" onClick={() => openMarketWatch('')}>
@@ -4848,7 +4848,7 @@ export default function App() {
                         {selectedScope ? selectedScope.name : 'All Wallets'}
                       </div>
                       {selectedScope && (
-                        <div style={{ fontSize: 12, color: 'var(--fg-subtle)', fontFamily: 'JetBrains Mono, monospace' }}>
+                        <div style={{ fontSize: 12, color: 'var(--fg-subtle)', fontFamily: 'var(--font-shell-display)', fontWeight: 700, letterSpacing: '-0.01em' }}>
                           {selectedScope.address.slice(0, 10)}...{selectedScope.address.slice(-8)}
                         </div>
                       )}
@@ -5305,12 +5305,12 @@ export default function App() {
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ fontSize: 12, color: 'var(--fg-subtle)' }}>USD</span>
-                                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: 'monospace' }}><PriceDisplay price={asset.price} /></span>
+                                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.01em' }}><PriceDisplay price={asset.price} /></span>
                                           </div>
                                           {priceInPls > 0 && (
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                               <span style={{ fontSize: 12, color: 'var(--fg-subtle)' }}>in PLS</span>
-                                              <span style={{ fontSize: 13, fontWeight: 700, color: '#f739ff', fontFamily: 'monospace' }}>
+                                              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--chain-pulse)', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.01em' }}>
                                                 {priceInPls >= 1e6 ? `${(priceInPls/1e6).toFixed(2)}M` : priceInPls >= 1e3 ? `${(priceInPls/1e3).toFixed(2)}K` : priceInPls >= 1 ? priceInPls.toFixed(2) : priceInPls < 0.001 ? priceInPls.toFixed(8) : priceInPls.toFixed(6)} PLS
                                               </span>
                                             </div>
@@ -5350,7 +5350,7 @@ export default function App() {
                                               <>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                                   <span style={{ fontSize: 12, color: 'var(--fg-subtle)' }}>Native Price</span>
-                                                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: 'monospace' }}>
+                                                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-shell-display)', letterSpacing: '-0.01em' }}>
                                                     {md?.nativePriceUsd ? `${parseFloat(md.nativePriceUsd).toFixed(4)}` : '-'}
                                                   </span>
                                                 </div>
@@ -5452,7 +5452,7 @@ export default function App() {
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
                                               <span style={{ fontSize: 12, color: 'var(--fg-subtle)' }}>Contract</span>
                                               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--fg-muted)' }}>{addr.slice(0,6)}...{addr.slice(-4)}</span>
+                                                <span style={{ fontSize: 12, fontFamily: 'var(--font-shell-display)', fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--fg-muted)' }}>{addr.slice(0,6)}...{addr.slice(-4)}</span>
                                                 <button onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(addr); }}
                                                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-subtle)', padding: 2 }}
                                                   onMouseOver={e => (e.currentTarget.style.color = '#aaa')}
