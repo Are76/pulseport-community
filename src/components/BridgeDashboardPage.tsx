@@ -177,7 +177,7 @@ export default function BridgeDashboardPage({ afterOfficialBridge }: { afterOffi
         {/* Big stat row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
           <StatBox label="Official Bridge TVL" value={knownTvl ? fmt(totalTvl) : '-'} sub="Live on-chain data" color="var(--accent)" mono />
-          <StatBox label="Bridge Options" value="3" sub="Official · Hyperlane · Liberty" color="#627EEA" />
+          <StatBox label="Bridge Options" value="3" sub="Official / Hyperlane / Liberty" color="#627EEA" />
           <StatBox label="On-Ramp Options" value="4" sub="RampNow · ChangeNow · 0xCoast · Guardarian" color="#f59e0b" />
           <StatBox label="Bridged Tokens" value={`${BRIDGE_TOKENS.length}`} sub="Via official bridge" color="#a855f7" />
         </div>
@@ -191,7 +191,7 @@ export default function BridgeDashboardPage({ afterOfficialBridge }: { afterOffi
       {/* -- Official PulseChain Bridge ----------------------------------------- */}
       <DropdownSection title="Official PulseChain Bridge" icon={<Zap size={15} color="var(--accent)" />} color="var(--accent)" badge="Live TVL">
         <p style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.7, margin: '0 0 18px' }}>
-          The official Ethereum ↔ PulseChain bridge (OmniBridge-based). Bridging from Ethereum mints a wrapped token on PulseChain at a different contract address. Bridged stablecoins (pDAI, pUSDC, pUSDT) are <strong style={{ color: 'var(--fg)' }}>not pegged to $1</strong> - always check live prices.
+          The official Ethereum / PulseChain bridge (OmniBridge-based). Bridging from Ethereum mints a wrapped token on PulseChain at a different contract address. Bridged stablecoins (pDAI, pUSDC, pUSDT) are <strong style={{ color: 'var(--fg)' }}>not pegged to $1</strong> - always check live prices.
         </p>
 
         {/* TVL highlight */}
@@ -383,7 +383,7 @@ export default function BridgeDashboardPage({ afterOfficialBridge }: { afterOffi
             {
               name: '0xCoast', url: 'https://0xcoast.com', tag: 'CST Stablecoin', color: 'var(--accent)',
               desc: 'Direct fiat on/off ramp for PulseChain using the CST stablecoin. Buy and sell PulseChain assets with bank fiat - no bridges required. CST supply growth is tracked on PulseChainStats.',
-              stats: [{ label: 'Stablecoin', value: 'CST' }, { label: 'Route', value: 'Fiat ↔ PLS' }],
+              stats: [{ label: 'Stablecoin', value: 'CST' }, { label: 'Route', value: 'Fiat / PLS' }],
             },
             {
               name: 'Guardarian', url: 'https://guardarian.com', tag: 'EU Licensed', color: '#a855f7',

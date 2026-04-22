@@ -18,6 +18,8 @@ type Lane = {
   items: Project[];
 };
 
+const faviconFor = (url: string) => `https://www.google.com/s2/favicons?sz=128&domain_url=${encodeURIComponent(url)}`;
+
 const TOKEN_LOGOS = {
   pls: 'https://tokens.app.pulsex.com/images/tokens/0xA1077a294dDE1B09bB078844df40758a5D0f9a27.png',
   plsx: 'https://tokens.app.pulsex.com/images/tokens/0x95B303987A60C71504D99Aa1b13B4DA07b0790ab.png',
@@ -53,9 +55,9 @@ const OFFICIAL_PROJECTS: Project[] = [
   { name: 'HEX', tag: 'Staking', url: 'https://hex.com', color: '#a855f7', desc: 'Stake HEX for up to 5,555 days and earn T-share yield.', logo: TOKEN_LOGOS.phex },
   { name: 'PulseX', tag: 'Official DEX', url: 'https://app.pulsex.com', color: 'var(--accent)', desc: 'Swap PRC20 tokens, provide liquidity, and farm INC rewards.', logo: TOKEN_LOGOS.plsx },
   { name: 'PulseChain Bridge', tag: 'Bridge', url: 'https://bridge.pulsechain.com', color: '#627EEA', desc: 'Move assets between Ethereum and PulseChain.', logo: TOKEN_LOGOS.pls },
-  { name: 'PulseChain Explorer', tag: 'Explorer', url: 'https://scan.pulsechain.com', color: '#06b6d4', desc: 'Inspect transactions, blocks, contracts, tokens, and wallets.' },
-  { name: 'ProveX', tag: 'Settlement', url: 'https://provex.tech', color: '#a855f7', desc: 'Proof-based peer-to-peer settlement in the ecosystem.' },
-  { name: 'Launchpad', tag: 'Validators', url: 'https://launchpad.pulsechain.com', color: '#a855f7', desc: 'Official validator setup and PLS validator staking.' },
+  { name: 'PulseChain Explorer', tag: 'Explorer', url: 'https://scan.pulsechain.com', color: '#06b6d4', desc: 'Inspect transactions, blocks, contracts, tokens, and wallets.', logo: faviconFor('https://scan.pulsechain.com') },
+  { name: 'ProveX', tag: 'Settlement', url: 'https://provex.tech', color: '#a855f7', desc: 'Proof-based peer-to-peer settlement in the ecosystem.', logo: faviconFor('https://provex.tech') },
+  { name: 'Launchpad', tag: 'Validators', url: 'https://launchpad.pulsechain.com', color: '#a855f7', desc: 'Official validator setup and PLS validator staking.', logo: faviconFor('https://launchpad.pulsechain.com') },
 ];
 
 const LANES: Lane[] = [
@@ -66,9 +68,9 @@ const LANES: Lane[] = [
     color: 'var(--accent)',
     items: [
       { name: 'PulseX V1 / V2', tag: 'Official DEX', url: 'https://app.pulsex.com', color: 'var(--accent)', desc: 'Core swap, LP, and INC farming venue.', logo: TOKEN_LOGOS.plsx },
-      { name: '9INCH / 9MM', tag: 'Concentrated LP', url: 'https://9inch.io', color: '#627EEA', desc: 'Uniswap V3-style concentrated liquidity.' },
-      { name: 'PHUX', tag: 'Balancer Fork', url: 'https://phux.io', color: '#a855f7', desc: 'Weighted and multi-token pools.' },
-      { name: 'LASO Finance', tag: 'Trading', url: 'https://laso.finance', color: '#06b6d4', desc: 'Advanced trading and liquidity tools.' },
+      { name: '9INCH / 9MM', tag: 'Concentrated LP', url: 'https://9inch.io', color: '#627EEA', desc: 'Uniswap V3-style concentrated liquidity.', logo: faviconFor('https://9inch.io') },
+      { name: 'PHUX', tag: 'Balancer Fork', url: 'https://phux.io', color: '#a855f7', desc: 'Weighted and multi-token pools.', logo: faviconFor('https://phux.io') },
+      { name: 'LASO Finance', tag: 'Trading', url: 'https://laso.finance', color: '#06b6d4', desc: 'Advanced trading and liquidity tools.', logo: faviconFor('https://laso.finance') },
     ],
   },
   {
@@ -77,10 +79,10 @@ const LANES: Lane[] = [
     icon: Route,
     color: '#627EEA',
     items: [
-      { name: 'Official Bridge', tag: 'Ethereum route', url: 'https://bridge.pulsechain.com', color: '#627EEA', desc: 'Canonical Ethereum to PulseChain bridge route.' },
-      { name: 'LibertySwap', tag: 'Privacy bridge', url: 'https://libertyswap.finance', color: '#a855f7', desc: 'Intent-based cross-chain swaps with privacy features.' },
-      { name: 'Hyperlane', tag: 'Messaging', url: 'https://hyperlane.xyz', color: '#06b6d4', desc: 'Interoperability layer and warp routes.' },
-      { name: '0xCoast', tag: 'Fiat ramp', url: 'https://0xcoast.com', color: '#22d3ee', desc: 'Fiat on/off ramp and CST stablecoin route.' },
+      { name: 'Official Bridge', tag: 'Ethereum route', url: 'https://bridge.pulsechain.com', color: '#627EEA', desc: 'Canonical Ethereum to PulseChain bridge route.', logo: faviconFor('https://bridge.pulsechain.com') },
+      { name: 'LibertySwap', tag: 'Privacy bridge', url: 'https://libertyswap.finance', color: '#a855f7', desc: 'Intent-based cross-chain swaps with privacy features.', logo: faviconFor('https://libertyswap.finance') },
+      { name: 'Hyperlane', tag: 'Messaging', url: 'https://hyperlane.xyz', color: '#06b6d4', desc: 'Interoperability layer and warp routes.', logo: faviconFor('https://hyperlane.xyz') },
+      { name: '0xCoast', tag: 'Fiat ramp', url: 'https://0xcoast.com', color: '#22d3ee', desc: 'Fiat on/off ramp and CST stablecoin route.', logo: faviconFor('https://0xcoast.com') },
     ],
   },
   {
@@ -89,10 +91,10 @@ const LANES: Lane[] = [
     icon: BarChart2,
     color: '#22d3ee',
     items: [
-      { name: 'PulseChainStats', tag: 'Analytics', url: 'https://pulsechainstats.com', color: 'var(--accent)', desc: 'Token intel, bridge stats, validators, and DEX volume.' },
-      { name: 'DexScreener', tag: 'Charts', url: 'https://dexscreener.com/pulsechain', color: '#22d3ee', desc: 'Pair charts, liquidity, volume, and token search.' },
-      { name: 'PulseCoinList', tag: 'Directory', url: 'https://pulsecoinlist.com', color: 'var(--chain-pulse)', desc: 'Broad project directory and discovery map.' },
-      { name: 'PLSFolio', tag: 'Portfolio', url: 'https://plsfolio.com/ecosystem/', color: '#627EEA', desc: 'Portfolio-oriented ecosystem resources.' },
+      { name: 'PulseChainStats', tag: 'Analytics', url: 'https://pulsechainstats.com', color: 'var(--accent)', desc: 'Token intel, bridge stats, validators, and DEX volume.', logo: faviconFor('https://pulsechainstats.com') },
+      { name: 'DexScreener', tag: 'Charts', url: 'https://dexscreener.com/pulsechain', color: '#22d3ee', desc: 'Pair charts, liquidity, volume, and token search.', logo: faviconFor('https://dexscreener.com/pulsechain') },
+      { name: 'PulseCoinList', tag: 'Directory', url: 'https://pulsecoinlist.com', color: 'var(--chain-pulse)', desc: 'Broad project directory and discovery map.', logo: faviconFor('https://pulsecoinlist.com') },
+      { name: 'PLSFolio', tag: 'Portfolio', url: 'https://plsfolio.com/ecosystem/', color: '#627EEA', desc: 'Portfolio-oriented ecosystem resources.', logo: faviconFor('https://plsfolio.com/ecosystem/') },
     ],
   },
   {
@@ -101,13 +103,18 @@ const LANES: Lane[] = [
     icon: WalletCards,
     color: '#a855f7',
     items: [
-      { name: 'Rabby Wallet', tag: 'Wallet', url: 'https://rabby.io', color: '#627EEA', desc: 'Multi-chain EVM wallet with transaction previews.' },
-      { name: 'MetaMask', tag: 'Wallet', url: 'https://metamask.io', color: '#a855f7', desc: 'Common EVM wallet with custom network support.' },
-      { name: 'Mintra', tag: 'NFT market', url: 'https://mintra.ai', color: 'var(--accent)', desc: 'PulseChain NFT marketplace.' },
-      { name: 'NOWnodes', tag: 'RPC', url: 'https://nownodes.io', color: '#22d3ee', desc: 'Node and RPC infrastructure.' },
+      { name: 'Rabby Wallet', tag: 'Wallet', url: 'https://rabby.io', color: '#627EEA', desc: 'Multi-chain EVM wallet with transaction previews.', logo: faviconFor('https://rabby.io') },
+      { name: 'MetaMask', tag: 'Wallet', url: 'https://metamask.io', color: '#a855f7', desc: 'Common EVM wallet with custom network support.', logo: faviconFor('https://metamask.io') },
+      { name: 'Mintra', tag: 'NFT market', url: 'https://mintra.ai', color: 'var(--accent)', desc: 'PulseChain NFT marketplace.', logo: faviconFor('https://mintra.ai') },
+      { name: 'NOWnodes', tag: 'RPC', url: 'https://nownodes.io', color: '#22d3ee', desc: 'Node and RPC infrastructure.', logo: faviconFor('https://nownodes.io') },
     ],
   },
 ];
+
+function getProjectMark(name: string) {
+  const compact = name.replace(/[^A-Za-z0-9]/g, '');
+  return compact.slice(0, 2).toUpperCase();
+}
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -188,7 +195,7 @@ function ProjectCard({ item }: { item: Project }) {
     <details className="pce-project-card" style={{ ['--project-color' as string]: item.color }}>
       <summary className="pce-project-summary">
         <span className="pce-project-logo">
-          {item.logo ? <img src={item.logo} alt="" /> : item.name.slice(0, 1)}
+          {item.logo ? <img src={item.logo} alt="" loading="lazy" /> : getProjectMark(item.name)}
         </span>
         <span className="pce-project-body">
           <span className="pce-project-top">
