@@ -4253,15 +4253,15 @@ export default function App() {
                          {/* Left: Portfolio Value + Stats */}
                          <div>
                            <div className="overview-kicker">My Net Worth</div>
-                           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 18 }}>
+                           <div className="overview-hero-value-row">
                              <div className="value-hero gradient-text-green">
                                ${summary.totalValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                              </div>
-                             <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingBottom: 6 }}>
+                             <div className="overview-hero-native">
                                <div className={`hero-change-pill ${summary.pnl24h >= 0 ? 'up' : 'down'}`}>
                                  {summary.pnl24h >= 0 ? '+' : '-'}${Math.abs(summary.pnl24h).toLocaleString('en-US', { maximumFractionDigits: 0 })} / {summary.pnl24h >= 0 ? '+' : '-'}{summary.pnl24hPercent.toFixed(2)}%
                                </div>
-                               <div style={{ fontSize: 13, color: t.textSecondary }}>{summary.nativeValue.toLocaleString('en-US', { maximumFractionDigits: 0 })} PLS</div>
+                               <div className="overview-hero-native-copy">{summary.nativeValue.toLocaleString('en-US', { maximumFractionDigits: 0 })} PLS tracked</div>
                              </div>
                            </div>
                            {/* Compact stats */}
@@ -4286,9 +4286,9 @@ export default function App() {
                              )}
                            </div>
                            <div className="overview-hero-divider" />
-                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="max-sm:grid-cols-1">
+                           <div className="overview-stat-grid max-sm:grid-cols-1">
                              {[
-                               { label: 'Total Invested', val: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `$${Math.abs(summary.netInvestment).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '-', sub: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? 'ETH + stablecoin inflows' : 'No ETH/stable inflows found', color: t.text,
+                               { label: 'Tracked Capital', val: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `$${Math.abs(summary.netInvestment).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '-', sub: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? 'ETH + stablecoin inflows' : 'No ETH/stable inflows found', color: t.text,
                                  icon: <TrendingUp size={14} color={t.textMuted} />, iconBg: t.cardHigh, link: true },
                               { label: 'Total P&L', val: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `${summary.unifiedPnl >= 0 ? '+' : '-'}$${Math.abs(summary.unifiedPnl).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '-', sub: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `${summary.unifiedPnl >= 0 ? '+' : '-'}${Math.abs((summary.unifiedPnl / summary.netInvestment) * 100).toFixed(1)}% vs invested` : 'P&L % needs ETH/stable history', color: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? (summary.unifiedPnl >= 0 ? t.green : t.red) : t.text,
                                 icon: <ArrowUpRight size={14} color={summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? (summary.unifiedPnl >= 0 ? t.green : t.red) : t.textMuted} />, iconBg: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? (summary.unifiedPnl >= 0 ? 'rgba(0,255,159,0.1)' : 'rgba(244,63,94,0.1)') : t.cardHigh, link: false },
@@ -4311,18 +4311,18 @@ export default function App() {
                          {/* Profit Planner + Market Watch buttons */}
                          <div className="overview-hero-actions">
                            <button
-                             onClick={() => openMarketWatch('')}
+                             onClick={() => setActiveTab('assets')}
                              className="overview-hero-action overview-hero-action--secondary"
                            >
-                             <Activity size={15} />
-                             Market Watch
+                             <LayoutDashboard size={15} />
+                             Open Holdings
                            </button>
                            <button
-                             onClick={() => setProfitPlannerOpen(true)}
+                             onClick={() => setActiveTab('history')}
                              className="overview-hero-action overview-hero-action--primary"
                            >
-                             <TrendingUp size={15} />
-                             Profit Planner
+                             <History size={15} />
+                             Transactions
                            </button>
                          </div>
                           </div>{/* end hero-grid-top */}

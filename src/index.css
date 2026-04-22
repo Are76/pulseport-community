@@ -10619,6 +10619,34 @@ body,
   font-weight: 800;
 }
 
+.overview-hero-value-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.overview-hero-native {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-bottom: 6px;
+}
+
+.overview-hero-native-copy {
+  color: var(--fg-muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.overview-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .overview-hero-actions {
   display: grid;
   align-content: start;
