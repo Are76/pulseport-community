@@ -5122,7 +5122,7 @@ export default function App() {
                     onHide={hideToken}
                     onSetEntry={(id, value) => setManualEntries(prev => ({ ...prev, [id]: value }))}
                     onClearEntry={(id) => setManualEntries(prev => { const n = { ...prev }; delete n[id]; return n; })}
-                    onFilterByAsset={symbol => { setTxAssetFilter(symbol); setActiveTab('overview'); }}
+                    onFilterByAsset={symbol => { setTxAssetFilter(symbol); setActiveTab('history'); }}
                     showSkeleton={isLoading && wallets.length > 0 && currentAssets.length === 0}
                     footerValueUsd={chainAssets.reduce((sum, asset) => sum + asset.value, 0)}
                     shareBaseUsd={summary.totalValue}
