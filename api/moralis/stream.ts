@@ -1,6 +1,7 @@
 type MoralisStreamRequest = {
   method?: string;
   body?: unknown;
+  headers?: Record<string, string | string[] | undefined>;
 };
 
 type MoralisStreamResponse = {
@@ -56,13 +57,30 @@ export default async function handler(req: MoralisStreamRequest, res: MoralisStr
     });
   }
 
-  const body = (req.body ?? {}) as MoralisStreamBody;
-  const summary = summarizePayload(body);
+  try {
+    const rawBody = req.body;
+    const body =
+      rawBody && typeof rawBody === 'object' ? (rawBody as MoralisStreamBody) : {};
 
-  console.log('[moralis-stream] webhook received', summary);
+    const summary = summarizePayload(body);
 
-  return res.status(200).json({
-    ok: true,
-    received: summary,
-  });
+    console.log('[moralis-stream] webhook received', {
+      headers: req.headers ?? {},
+      bodyType: typeof rawBody,
+      summary,
+      rawBody,
+    });
+
+    return res.status(200).json({
+      ok: true,
+      received: summary,
+    });
+  } catch (error) {
+    console.error('[moralis-stream] webhook error', error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error instanceof Error ? error.message : 'Unknown webhook error',
+    });
+  }
 }
