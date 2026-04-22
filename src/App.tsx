@@ -6002,7 +6002,7 @@ export default function App() {
               {/* Hero card */}
               <div className="wallet-hero-panel">
                 <div className="wallet-hero-header">
-                  <div>
+                  <div className="wallet-hero-copy">
                     <div className="wallet-hero-eyebrow">{isAll ? 'Tracked wallets' : 'Tracked wallet'}</div>
                     <div className="wallet-hero-title">{isAll ? 'Wallet view' : selWallet?.name}</div>
                     {!isAll && <div className="wallet-hero-address">{selWallet?.address}</div>}
@@ -6028,12 +6028,12 @@ export default function App() {
                   <div className="wallet-hex-strip">
                     {walletPHex > 0 && (
                       <span>
-                        pHEX <strong style={{ color: '#fb923c' }}>{fmtHexCount(walletPHex)}</strong>
+                        pHEX <strong className="wallet-hex-value wallet-hex-value--pulse">{fmtHexCount(walletPHex)}</strong>
                       </span>
                     )}
                     {walletEHex > 0 && (
                       <span>
-                        eHEX <strong style={{ color: '#627EEA' }}>{fmtHexCount(walletEHex)}</strong>
+                        eHEX <strong className="wallet-hex-value wallet-hex-value--eth">{fmtHexCount(walletEHex)}</strong>
                       </span>
                     )}
                   </div>
@@ -6051,28 +6051,27 @@ export default function App() {
 
               {/* Asset list - full Token Positions module */}
               <div className="wallet-holdings-card" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-                <div className="wallet-holdings-head" style={{ padding: '14px 16px', borderBottom: isCollapsed('wallet-holdings') ? 'none' : `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                  <div>
+                <div className={`wallet-holdings-head wallet-holdings-head--premium ${isCollapsed('wallet-holdings') ? '' : 'wallet-holdings-head--divided'}`}>
+                  <div className="wallet-holdings-copy">
                     <div className="wallet-section-label">Wallet</div>
                     <div className="wallet-section-title">Holdings</div>
                     <div className="wallet-section-subtitle">{filteredViewAssets.length} tokens  -  ${walletUsdValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                   </div>
-                  <div className="wallet-holdings-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div className="wallet-period-switch" style={{ display: 'flex', gap: 3, background: 'var(--bg-elevated)', border: `1px solid ${t.border}`, borderRadius: 8, padding: 3 }}>
+                  <div className="wallet-holdings-actions">
+                    <div className="wallet-period-switch wallet-period-switch--premium">
                       {([['1h','1H'],['6h','6H'],['24h','24H'],['7d','7D']] as const).map(([p, label]) => (
-                        <button key={p} onClick={() => setPriceChangePeriod(p)}
-                          style={{ padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all .12s', border: 'none',
-                            background: priceChangePeriod === p ? 'var(--accent)' : 'transparent',
-                            color: priceChangePeriod === p ? (theme === 'dark' ? '#000' : '#fff') : 'var(--fg-subtle)' }}>
+                        <button key={p} onClick={() => setPriceChangePeriod(p)} className={`wallet-period-button ${priceChangePeriod === p ? 'is-active' : ''}`}>
                           {label}
                         </button>
                       ))}
                     </div>
-                    <button onClick={() => toggleSection('wallet-holdings')}
-                      style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-subtle)', transition: 'color .12s' }}
-                      onMouseOver={e => (e.currentTarget.style.color = 'var(--fg)')}
-                      onMouseOut={e => (e.currentTarget.style.color = 'var(--fg-subtle)')}
-                      title={isCollapsed('wallet-holdings') ? 'Expand' : 'Collapse'}>
+                    <button
+                      onClick={() => toggleSection('wallet-holdings')}
+                      className="overview-panel-toggle"
+                      aria-label={isCollapsed('wallet-holdings') ? 'Expand wallet holdings' : 'Collapse wallet holdings'}
+                      aria-expanded={!isCollapsed('wallet-holdings')}
+                      title={isCollapsed('wallet-holdings') ? 'Expand' : 'Collapse'}
+                    >
                       {isCollapsed('wallet-holdings') ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                     </button>
                   </div>

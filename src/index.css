@@ -9570,6 +9570,10 @@ body,
   flex-wrap: wrap;
 }
 
+.wallet-hero-copy {
+  min-width: 0;
+}
+
 .wallet-hero-eyebrow,
 .wallet-section-label,
 .transaction-page-kicker {
@@ -9629,6 +9633,8 @@ body,
 .wallet-hero-value {
   font-size: clamp(34px, 5vw, 52px);
   line-height: .95;
+  letter-spacing: -0.04em;
+  font-family: var(--font-shell-display);
 }
 
 .wallet-summary-strip,
@@ -9669,6 +9675,14 @@ body,
   font-weight: 700;
 }
 
+.wallet-hex-value--pulse {
+  color: #fb923c;
+}
+
+.wallet-hex-value--eth {
+  color: #627EEA;
+}
+
 .wallet-holdings-card,
 .transaction-page-head {
   border: 1px solid rgba(255,255,255,0.06);
@@ -9692,8 +9706,54 @@ body,
   background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
 }
 
-.wallet-period-switch button {
+.wallet-holdings-head--premium {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.wallet-holdings-head--divided {
+  border-bottom: 1px solid var(--border);
+}
+
+.wallet-holdings-copy {
+  min-width: 0;
+}
+
+.wallet-period-switch--premium {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+}
+
+.wallet-period-button {
   min-width: 44px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg-subtle);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+.wallet-period-button:hover {
+  color: var(--fg);
+  background: rgba(255,255,255,0.05);
+}
+
+.wallet-period-button.is-active {
+  background: var(--accent);
+  color: #07110c;
+  box-shadow: 0 0 10px rgba(0,255,159,0.22);
 }
 
 .transaction-page-shell {
@@ -9919,6 +9979,11 @@ body,
 
 [data-theme="light"] .transaction-page-head-side {
   border-left-color: rgba(15,23,42,0.08);
+}
+
+[data-theme="light"] .wallet-period-switch--premium {
+  background: rgba(255,255,255,0.88);
+  border-color: rgba(15,23,42,0.08);
 }
 
 [data-theme="light"] .transaction-page-stat {
@@ -10299,8 +10364,24 @@ body,
     grid-template-columns: 1fr;
   }
 
+  .wallet-holdings-head--premium {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
   .wallet-hero-summary {
     min-width: 0;
+  }
+
+  .wallet-period-switch--premium {
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .wallet-period-switch--premium::-webkit-scrollbar {
+    display: none;
   }
 
   .transaction-page-head {
