@@ -4240,15 +4240,11 @@ export default function App() {
                 {(() => {
                    return (
                      <>
-                     <div className={`hero-card overview-hero-card ${theme === 'dark' ? 'hero-bg-dark' : 'hero-bg-light'}`} style={{
-                       border: `1px solid rgba(0,255,159,0.12)`, borderRadius: 20, padding: '28px 28px', position: 'relative', overflow: 'hidden',
-                       boxShadow: '0 0 0 1px rgba(0,255,159,0.04), 0 8px 40px rgba(0,0,0,0.5)'
-                     }}>
-                       {/* Top edge glow */}
-                       <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,255,159,0.4), transparent)', pointerEvents: 'none' }} />
-                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none',
-                         background: 'radial-gradient(ellipse at 5% 60%, rgba(0,255,159,.07) 0%, transparent 45%), radial-gradient(ellipse at 92% 50%, rgba(99,102,241,.05) 0%, transparent 45%)' }} />
-                       <div className="hero-grid" style={{ position: 'relative' }}>
+                    <div className={`hero-card overview-hero-card overview-hero-frame ${theme === 'dark' ? 'hero-bg-dark' : 'hero-bg-light'}`}>
+                      {/* Top edge glow */}
+                      <div className="overview-hero-frame-glow" />
+                      <div className="overview-hero-frame-wash" />
+                      <div className="hero-grid overview-hero-grid">
                           <div className="hero-grid-top">
                          {/* Left: Portfolio Value + Stats */}
                          <div>
@@ -4276,32 +4272,32 @@ export default function App() {
                                const totalEHex = currentAssets.filter(a => (a.chain === 'ethereum' && (a as any).address?.toLowerCase() === HEX_A) || (a.chain === 'pulsechain' && a.symbol === 'eHEX')).reduce((s, a) => s + a.balance, 0)
                                               + currentStakes.filter(s => s.chain === 'ethereum' && (s.daysRemaining ?? 0) > 0).reduce((s, st) => s + (st.stakedHex ?? 0), 0);
                                return <>
-                                 <span className="overview-hero-pill">pHEX <strong style={{ color: '#fb923c' }}>{totalPHex >= 1e6 ? `${(totalPHex/1e6).toFixed(1)}M` : totalPHex >= 1e3 ? `${(totalPHex/1e3).toFixed(0)}K` : Math.round(totalPHex).toLocaleString('en-US')}</strong></span>
-                                 <span className="overview-hero-pill">eHEX <strong style={{ color: '#627EEA' }}>{totalEHex >= 1e6 ? `${(totalEHex/1e6).toFixed(1)}M` : totalEHex >= 1e3 ? `${(totalEHex/1e3).toFixed(0)}K` : Math.round(totalEHex).toLocaleString('en-US')}</strong></span>
-                               </>;
-                             })() : (
-                               <button onClick={() => setIsAddingWallet(true)} style={{ fontSize: 12, color: 'var(--accent)', background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 6, padding: '2px 10px', cursor: 'pointer', fontWeight: 600, transition: 'all .15s' }}>
-                                 + Add Wallet
-                               </button>
-                             )}
+                                <span className="overview-hero-pill">pHEX <strong className="overview-hero-pill__value overview-hero-pill__value--pulse">{totalPHex >= 1e6 ? `${(totalPHex/1e6).toFixed(1)}M` : totalPHex >= 1e3 ? `${(totalPHex/1e3).toFixed(0)}K` : Math.round(totalPHex).toLocaleString('en-US')}</strong></span>
+                                <span className="overview-hero-pill">eHEX <strong className="overview-hero-pill__value overview-hero-pill__value--eth">{totalEHex >= 1e6 ? `${(totalEHex/1e6).toFixed(1)}M` : totalEHex >= 1e3 ? `${(totalEHex/1e3).toFixed(0)}K` : Math.round(totalEHex).toLocaleString('en-US')}</strong></span>
+                              </>;
+                            })() : (
+                              <button onClick={() => setIsAddingWallet(true)} className="overview-hero-add-wallet">
+                                + Add Wallet
+                              </button>
+                            )}
                            </div>
                            <div className="overview-hero-divider" />
                            <div className="overview-stat-grid max-sm:grid-cols-1">
                              {[
-                               { label: 'Tracked Capital', val: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `$${Math.abs(summary.netInvestment).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '-', sub: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? 'ETH + stablecoin inflows' : 'No ETH/stable inflows found', color: t.text,
-                                 icon: <TrendingUp size={14} color={t.textMuted} />, iconBg: t.cardHigh, link: true },
+                              { label: 'Tracked Capital', val: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `$${Math.abs(summary.netInvestment).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '-', sub: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? 'ETH + stablecoin inflows' : 'No ETH/stable inflows found', color: t.text,
+                                icon: <TrendingUp size={14} color={t.textMuted} />, iconBg: t.cardHigh, link: true },
                               { label: 'Total P&L', val: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `${summary.unifiedPnl >= 0 ? '+' : '-'}$${Math.abs(summary.unifiedPnl).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '-', sub: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? `${summary.unifiedPnl >= 0 ? '+' : '-'}${Math.abs((summary.unifiedPnl / summary.netInvestment) * 100).toFixed(1)}% vs invested` : 'P&L % needs ETH/stable history', color: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? (summary.unifiedPnl >= 0 ? t.green : t.red) : t.text,
                                 icon: <ArrowUpRight size={14} color={summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? (summary.unifiedPnl >= 0 ? t.green : t.red) : t.textMuted} />, iconBg: summary.netInvestment > MIN_INVESTMENT_THRESHOLD ? (summary.unifiedPnl >= 0 ? 'rgba(0,255,159,0.1)' : 'rgba(244,63,94,0.1)') : t.cardHigh, link: false },
                              ].map(({ label, val, sub, color, icon, iconBg, link }) => (
                                <div key={label} className="stat-card" onClick={link ? () => setActiveTab('history') : undefined}
                                  style={link ? { cursor: 'pointer' } : undefined}>
-                                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
-                                   <div style={{ width: 26, height: 26, borderRadius: 8, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                     {icon}
-                                   </div>
-                                   <div className="stat-card-label">{label}</div>
-                                   {link && <ExternalLink size={10} style={{ marginLeft: 'auto', color: 'var(--fg-subtle)', flexShrink: 0 }} />}
-                                 </div>
+                                <div className="stat-card-head">
+                                  <div className="stat-card-icon" style={{ background: iconBg }}>
+                                    {icon}
+                                  </div>
+                                  <div className="stat-card-label">{label}</div>
+                                  {link && <ExternalLink size={10} className="stat-card-link-icon" />}
+                                </div>
                                  <div className="stat-card-value" style={{ color }}>{val}</div>
                                  <div className="stat-card-sub">{sub}</div>
                                </div>
@@ -4574,57 +4570,62 @@ export default function App() {
                   ];
                   return (
                     <div className="hero-hex-holdings-section overview-section-card">
-                      <div style={{ padding: '12px 16px', borderBottom: isCollapsed('hex-boxes') ? 'none' : `1px solid ${t.borderLight}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="overview-section-title">My HEX Holdings</div>
-                        <button onClick={() => toggleSection('hex-boxes')}
-                          style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: t.textMuted, transition: 'color .12s' }}
-                          onMouseOver={e => (e.currentTarget.style.color = t.text)}
-                          onMouseOut={e => (e.currentTarget.style.color = t.textMuted)}
-                          title={isCollapsed('hex-boxes') ? 'Expand' : 'Collapse'}>
+                      <div className={`overview-panel-header ${isCollapsed('hex-boxes') ? '' : 'overview-panel-header--divided'}`}>
+                        <div className="overview-panel-heading">
+                          <span className="overview-panel-kicker">HEX Positioning</span>
+                          <div className="overview-section-title">My HEX Holdings</div>
+                        </div>
+                        <button
+                          onClick={() => toggleSection('hex-boxes')}
+                          className="overview-panel-toggle"
+                          aria-label={isCollapsed('hex-boxes') ? 'Expand HEX holdings' : 'Collapse HEX holdings'}
+                          aria-expanded={!isCollapsed('hex-boxes')}
+                          title={isCollapsed('hex-boxes') ? 'Expand' : 'Collapse'}
+                        >
                           {isCollapsed('hex-boxes') ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                         </button>
                       </div>
                       {!isCollapsed('hex-boxes') && (
                         <>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0 }} className="max-sm:grid-cols-1">
+                        <div className="overview-hex-grid max-sm:grid-cols-1">
                           {boxes.map(b => (
-                            <div key={b.label} style={{ padding: 16, borderRight: `1px solid ${t.borderLight}` }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                                <div style={{ width: 7, height: 7, borderRadius: '50%', background: b.dot }} />
-                                <span style={{ fontSize: 13, fontWeight: 600, color: t.textSecondary, textTransform: 'uppercase', letterSpacing: '.5px' }}>{b.label}</span>
+                            <div key={b.label} className="overview-hex-card">
+                              <div className="overview-hex-card-head">
+                                <div className="overview-hex-card-dot" style={{ background: b.dot }} />
+                                <span className="overview-hex-card-label">{b.label}</span>
                               </div>
-                              <div style={{ fontSize: 22, fontWeight: 700, color: b.color, letterSpacing: '-0.5px' }}>{b.val}</div>
-                              {b.usd !== null && <div style={{ fontSize: 13, color: t.textSecondary, marginTop: 2 }}>${b.usd.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>}
-                              <div style={{ fontSize: 13, color: t.textMuted, marginTop: 6 }}>{b.sub}</div>
+                              <div className="overview-hex-card-value" style={{ color: b.color }}>{b.val}</div>
+                              {b.usd !== null && <div className="overview-hex-card-usd">${b.usd.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>}
+                              <div className="overview-hex-card-sub">{b.sub}</div>
                             </div>
                           ))}
                         </div>
                         {/* -- Stake Principal + Yield Breakdown -- */}
                         {(pHexPrincipal > 0 || eHexPrincipal > 0) && (
-                          <div style={{ borderTop: `1px solid ${t.borderLight}`, padding: '12px 16px' }}>
-                            <div style={{ fontSize: 11, fontWeight: 700, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '.7px', marginBottom: 10 }}>Stake Breakdown - Principal + Accrued Yield</div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="max-sm:grid-cols-1">
+                          <div className="overview-hex-breakdown">
+                            <div className="overview-hex-breakdown-label">Stake Breakdown - Principal + Accrued Yield</div>
+                            <div className="overview-hex-breakdown-grid max-sm:grid-cols-1">
                               {[
                                 { label: 'pHEX Staked', principal: pHexPrincipal, yield: pHexYield, total: pHexStaked, color: '#fb923c', usdPrice: pHexPrice },
                                 { label: 'eHEX Staked', principal: eHexPrincipal, yield: eHexYield, total: eHexStaked, color: '#627EEA', usdPrice: eHexPrice },
                               ].filter(r => r.principal > 0 || r.yield > 0).map(r => (
-                                <div key={r.label} style={{ background: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)', border: `1px solid ${t.borderLight}`, borderRadius: 10, padding: '12px 14px' }}>
-                                  <div style={{ fontSize: 11, fontWeight: 700, color: r.color, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>{r.label}</div>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                      <span style={{ fontSize: 12, color: t.textMuted }}>Principal</span>
-                                      <span style={{ fontSize: 13, fontWeight: 700, color: t.text, fontFamily: 'var(--font-shell-display)' }}>{fmtBigNum(r.principal)}</span>
+                                <div key={r.label} className="overview-hex-breakdown-card">
+                                  <div className="overview-hex-breakdown-title" style={{ color: r.color }}>{r.label}</div>
+                                  <div className="overview-hex-breakdown-rows">
+                                    <div className="overview-hex-breakdown-row">
+                                      <span>Principal</span>
+                                      <strong>{fmtBigNum(r.principal)}</strong>
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                      <span style={{ fontSize: 12, color: t.textMuted }}>Accrued Yield</span>
-                                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-shell-display)' }}>+{fmtBigNum(r.yield)}</span>
+                                    <div className="overview-hex-breakdown-row">
+                                      <span>Accrued Yield</span>
+                                      <strong className="overview-hex-breakdown-yield">+{fmtBigNum(r.yield)}</strong>
                                     </div>
-                                    <div style={{ height: 1, background: t.borderLight, margin: '2px 0' }} />
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                      <span style={{ fontSize: 12, fontWeight: 600, color: t.textSecondary }}>Total</span>
-                                      <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: 14, fontWeight: 800, color: r.color, fontFamily: 'var(--font-shell-display)' }}>{fmtBigNum(r.total)}</div>
-                                        <div style={{ fontSize: 11, color: t.textMuted }}>${(r.total * r.usdPrice).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                                    <div className="overview-hex-breakdown-separator" />
+                                    <div className="overview-hex-breakdown-row">
+                                      <span className="overview-hex-breakdown-total-label">Total</span>
+                                      <div className="overview-hex-breakdown-total">
+                                        <div style={{ color: r.color }}>{fmtBigNum(r.total)}</div>
+                                        <div>${(r.total * r.usdPrice).toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                                       </div>
                                     </div>
                                   </div>
@@ -4734,42 +4735,40 @@ export default function App() {
                   const fmtYAxis = (v: number) => v >= 1000 ? `$${(v / 1000).toFixed(0)}k` : `$${v.toFixed(0)}`;
 
                   return (
-                    <div className="overview-section-card" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 14, overflow: 'hidden' }}>
-                      <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, borderBottom: isCollapsed('perf-chart') ? 'none' : `1px solid ${t.borderLight}` }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div className="overview-section-card overview-performance-panel">
+                      <div className={`overview-panel-header ${isCollapsed('perf-chart') ? '' : 'overview-panel-header--divided'}`}>
+                        <div className="overview-performance-head">
                           <div className="overview-section-title">Portfolio Performance</div>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: periodChange >= 0 ? t.green : t.red }}>
+                          <div className="overview-performance-delta" style={{ color: periodChange >= 0 ? t.green : t.red }}>
                             {periodChange >= 0 ? '+' : ''}{periodChange.toFixed(2)}%
                           </div>
-                          {isSimulated && <div style={{ fontSize: 10, color: t.textMuted, fontStyle: 'italic' }}>simulated</div>}
+                          {isSimulated && <div className="overview-performance-badge">Modeled</div>}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div className="overview-performance-actions">
                           {/* Period tabs */}
                           {!isCollapsed('perf-chart') && (
-                            <div style={{ display: 'flex', gap: 2, background: t.cardHigh, border: `1px solid ${t.border}`, borderRadius: 8, padding: 3 }}>
+                            <div className="overview-performance-tabs">
                               {(['1w','1m','1y','all'] as const).map(p => (
-                                <button key={p} onClick={() => setPerfPeriod(p)}
-                                  style={{ padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: 'none', transition: 'all .12s',
-                                    background: perfPeriod === p ? 'var(--accent)' : 'var(--bg-elevated)',
-                                    color: perfPeriod === p ? (theme === 'dark' ? '#000' : '#fff') : 'var(--fg-muted)',
-                                    boxShadow: perfPeriod === p ? '0 0 10px rgba(0,255,159,0.25)' : 'none' }}>
+                                <button key={p} onClick={() => setPerfPeriod(p)} className={`overview-performance-tab ${perfPeriod === p ? 'is-active' : ''}`}>
                                   {periodLabel[p]}
                                 </button>
                               ))}
                             </div>
                           )}
-                          <button onClick={() => toggleSection('perf-chart')}
-                            style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: t.textMuted, transition: 'color .12s' }}
-                            onMouseOver={e => (e.currentTarget.style.color = t.text)}
-                            onMouseOut={e => (e.currentTarget.style.color = t.textMuted)}
-                            title={isCollapsed('perf-chart') ? 'Expand' : 'Collapse'}>
+                          <button
+                            onClick={() => toggleSection('perf-chart')}
+                            className="overview-panel-toggle"
+                            aria-label={isCollapsed('perf-chart') ? 'Expand portfolio performance' : 'Collapse portfolio performance'}
+                            aria-expanded={!isCollapsed('perf-chart')}
+                            title={isCollapsed('perf-chart') ? 'Expand' : 'Collapse'}
+                          >
                             {isCollapsed('perf-chart') ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                           </button>
                         </div>
                       </div>
                       {!isCollapsed('perf-chart') && (
-                        <div style={{ padding: '10px 4px 10px 0' }}>
-                          <div style={{ width: '100%', minWidth: 1, minHeight: 1, height: 270 }}>
+                        <div className="overview-performance-body">
+                          <div className="overview-performance-chart">
                             <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
                               <AreaChart data={chartPoints} margin={{ top: 4, right: 18, left: 0, bottom: 0 }}>
                                 <defs>
