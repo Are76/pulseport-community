@@ -4851,49 +4851,49 @@ export default function App() {
                   return (<>
 
                 {/* -- Wallet scope + management banner -- */}
-                <div className="portfolio-wallet-banner" style={{ background: 'var(--bg-elevated)', borderRadius: 16, padding: '24px', border: '1px solid var(--accent-border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
-                    <div>
-                      <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 8 }}>
+                <div className="portfolio-wallet-banner portfolio-wallet-banner--premium">
+                  <div className="portfolio-wallet-head">
+                    <div className="portfolio-wallet-copy">
+                      <div className="portfolio-wallet-kicker">
                         {selectedScope ? selectedScope.name : 'All Wallets'}
                       </div>
                       {selectedScope && (
-                        <div style={{ fontSize: 12, color: 'var(--fg-subtle)', fontFamily: 'var(--font-shell-display)', fontWeight: 700, letterSpacing: '-0.01em' }}>
+                        <div className="portfolio-wallet-address">
                           {selectedScope.address.slice(0, 10)}...{selectedScope.address.slice(-8)}
                         </div>
                       )}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <div className="portfolio-wallet-actions">
                       {selectedScope && (
                         <>
-                          <button className="btn-ghost" style={{ fontSize: 12, padding: '7px 10px' }} onClick={() => navigator.clipboard.writeText(selectedScope.address)}>
+                          <button className="btn-ghost portfolio-wallet-action" onClick={() => navigator.clipboard.writeText(selectedScope.address)}>
                             <Copy size={13} /> Copy
                           </button>
-                          <button className="btn-ghost" style={{ fontSize: 12, padding: '7px 10px' }} onClick={() => { setEditingWalletAddress(selectedScope.address); setEditWalletName(selectedScope.name); }}>
+                          <button className="btn-ghost portfolio-wallet-action" onClick={() => { setEditingWalletAddress(selectedScope.address); setEditWalletName(selectedScope.name); }}>
                             <Pencil size={13} /> Rename
                           </button>
                         </>
                       )}
-                      <button className="btn-primary" style={{ fontSize: 12, padding: '7px 12px' }} onClick={() => setIsAddingWallet(true)}>
+                      <button className="btn-primary portfolio-wallet-action portfolio-wallet-action--primary" onClick={() => setIsAddingWallet(true)}>
                         <Plus size={13} /> Add Wallet
                       </button>
                     </div>
                   </div>
-                  <div style={{ fontSize: 36, fontWeight: 800, color: 'var(--fg)', marginBottom: 16 }}>
+                  <div className="portfolio-wallet-value">
                     ${(selectedScope ? selectedTotalUsd : summary.totalValue).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+                  <div className="portfolio-wallet-summary">
                     <span className="wallet-stat-pill-green">
                       Liquid ${(selectedScope ? selectedLiquidUsd : summary.liquidValue).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </span>
-                    <span style={{ background: 'rgba(239,68,68,0.12)', color: t.red, padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: '1px solid rgba(239,68,68,0.20)' }}>
+                    <span className="portfolio-wallet-pill portfolio-wallet-pill--staking" style={{ color: t.red }}>
                       Staking ${(selectedScope ? selectedStakingUsd : summary.stakingValueUsd).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </span>
-                    <span style={{ background: 'var(--bg-surface)', color: 'var(--fg-muted)', padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 600, border: '1px solid var(--border)' }}>
+                    <span className="portfolio-wallet-pill">
                       {visibleWalletAssets.length} token{visibleWalletAssets.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <div className="wallet-selector-bar" style={{ marginBottom: 14 }}>
+                  <div className="wallet-selector-bar portfolio-wallet-selector">
                     <button
                       className={`wallet-pill${selectedWalletAddr === 'all' ? ' active' : ''}`}
                       onClick={() => { setSelectedWalletAddr('all'); setActiveWallet(null); }}
@@ -4921,7 +4921,7 @@ export default function App() {
                       );
                     })}
                   </div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <div className="portfolio-chain-filter-row">
                     {(['all', 'pulsechain', 'ethereum', 'base'] as const).map(c => (
                       <button key={c} onClick={() => setWalletChainFilter(c)}
                         className={`filter-pill${walletChainFilter === c ? ' active' : ''}`}>
@@ -5000,18 +5000,15 @@ export default function App() {
                 </div>
 
                 {/* Header row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                  <div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: t.text, marginBottom: 2 }}>Holdings</div>
-                    <div style={{ fontSize: 13, color: t.textSecondary }}>{chainAssets.length} token{chainAssets.length !== 1 ? 's' : ''}  -  ${summary.liquidValue.toLocaleString('en-US', { maximumFractionDigits: 0 })} liquid</div>
+                <div className="portfolio-section-topbar">
+                  <div className="portfolio-section-heading">
+                    <div className="portfolio-section-title">Holdings</div>
+                    <div className="portfolio-section-subtitle">{chainAssets.length} token{chainAssets.length !== 1 ? 's' : ''}  -  ${summary.liquidValue.toLocaleString('en-US', { maximumFractionDigits: 0 })} liquid</div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: 3, background: t.cardHigh, border: `1px solid ${t.border}`, borderRadius: 8, padding: 3 }}>
+                  <div className="portfolio-section-actions">
+                    <div className="portfolio-period-switch">
                       {([['1h','1H'],['6h','6H'],['24h','24H'],['7d','7D']] as const).map(([p, label]) => (
-                        <button key={p} onClick={() => setPriceChangePeriod(p)}
-                          style={{ padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all .12s', border: 'none',
-                            background: priceChangePeriod === p ? 'var(--accent)' : 'transparent',
-                            color: priceChangePeriod === p ? (theme === 'dark' ? '#000' : '#fff') : t.textMuted }}>
+                        <button key={p} onClick={() => setPriceChangePeriod(p)} className={`portfolio-period-button ${priceChangePeriod === p ? 'is-active' : ''}`}>
                           {label}
                         </button>
                       ))}
@@ -5020,28 +5017,27 @@ export default function App() {
                 </div>
                 {/* Token Table */}
                 <div className="portfolio-holdings-shell md-elevation-1" style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                  <div style={{ padding: '14px 16px', borderBottom: isCollapsed('assets-table') ? 'none' : `1px solid ${t.borderLight}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: t.text }}>Assets</div>
-                      <div style={{ fontSize: 13, color: t.textSecondary, marginTop: 2 }}>{chainAssets.length} tokens  -  ${summary.liquidValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                  <div className={`portfolio-panel-header ${isCollapsed('assets-table') ? '' : 'portfolio-panel-header--divided'}`}>
+                    <div className="portfolio-panel-heading">
+                      <div className="portfolio-panel-title">Assets</div>
+                      <div className="portfolio-panel-subtitle">{chainAssets.length} tokens  -  ${summary.liquidValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="portfolio-panel-actions">
                       <button
                         type="button"
                         onClick={() => setAllocationCalculatorOpen(v => !v)}
-                        style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${allocationCalculatorOpen ? 'var(--accent-border)' : t.border}`,
-                          background: allocationCalculatorOpen ? 'var(--accent-dim)' : t.cardHigh,
-                          color: allocationCalculatorOpen ? 'var(--accent)' : t.textSecondary,
-                          cursor: 'pointer', transition: 'all .12s', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700 }}
+                        className={`portfolio-inline-action ${allocationCalculatorOpen ? 'is-active' : ''}`}
                       >
                         <Calculator size={13} />
                         {allocationCalculatorOpen ? 'Close Calculator' : 'Open Calculator'}
                       </button>
-                      <button onClick={() => toggleSection('assets-table')}
-                        style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-subtle)', transition: 'color .12s' }}
-                        onMouseOver={e => (e.currentTarget.style.color = 'var(--fg)')}
-                        onMouseOut={e => (e.currentTarget.style.color = 'var(--fg-subtle)')}
-                        title={isCollapsed('assets-table') ? 'Expand' : 'Collapse'}>
+                      <button
+                        onClick={() => toggleSection('assets-table')}
+                        className="overview-panel-toggle"
+                        aria-label={isCollapsed('assets-table') ? 'Expand assets table' : 'Collapse assets table'}
+                        aria-expanded={!isCollapsed('assets-table')}
+                        title={isCollapsed('assets-table') ? 'Expand' : 'Collapse'}
+                      >
                         {isCollapsed('assets-table') ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                       </button>
                     </div>
