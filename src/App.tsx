@@ -1428,6 +1428,13 @@ export default function App() {
 
             const apiKey = etherscanApiKey || import.meta.env.VITE_ETHERSCAN_API_KEY || '';
 
+            if (!apiKey) {
+              console.warn(
+                '[ethereum] No Etherscan API key found. Ethereum transaction history will be skipped. ' +
+                'Add VITE_ETHERSCAN_API_KEY to your .env or enter a key via the Settings (API) button.'
+              );
+            } else {
+
             const fetchAllTxPages = async (action: string): Promise<any[]> => {
               const results: any[] = [];
               let page = 1;
@@ -1569,6 +1576,7 @@ export default function App() {
                 fee: 0
               });
             });
+            } // end else { if (apiKey) ... }
             } // end else (ethereum/base)
           } catch (e) {
             console.warn(`Could not fetch transactions for ${address} on ${chainKey}:`, e);
